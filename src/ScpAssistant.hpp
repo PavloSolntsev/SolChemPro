@@ -38,7 +38,7 @@ class ScpAssistant : public Gtk::Assistant
 		void on_combobox_page2_changed();
 		void on_server_enrty_changed();
 		void on_password_enrty_changed();
-		void on_entries_server_password_changed();
+		void on_entries_server_dbname_changed();
 		Glib::ustring &get_dbtype();
 		Glib::ustring get_dbfile();
 		Glib::ustring get_server();
@@ -55,11 +55,11 @@ class ScpAssistant : public Gtk::Assistant
 		// page4 Server database 
 		Gtk::Grid m_grid_page4;
 		Gtk::Label m_label_server_page4;
+		Gtk::Label m_label_dbname_page4;
 		Gtk::Label m_label_username_page4;
-		Gtk::Label m_label_password_page4;
 
 		Gtk::Entry m_entry_server_page4;
-		Gtk::Entry m_entry_password_page4;
+		Gtk::Entry m_entry_dbname_page4;
 		Gtk::Entry m_entry_username_page4;
 		// Page 5
 

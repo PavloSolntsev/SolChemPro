@@ -35,6 +35,7 @@ namespace ScpKeyfile
 
 	const Glib::ustring KEY_STARTCHECK    = "START_CHECK";
 	const Glib::ustring KEY_DBTYPE        = "DBTYPE";
+	const Glib::ustring KEY_DBNAME        = "DBNAME";
 	const Glib::ustring KEY_SERVER        = "SERVER";
 	const Glib::ustring KEY_USERNAME      = "USERNAME";
 	const Glib::ustring KEY_DBFILE        = "DBFILE";

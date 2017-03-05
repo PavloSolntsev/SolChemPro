@@ -111,16 +111,16 @@ ScpAssistant::ScpAssistant():
 	m_label_server_page4.set_halign(Gtk::ALIGN_END);
 	m_label_server_page4.set_valign(Gtk::ALIGN_END);
 
-	m_grid_page4.attach(m_label_username_page4,0,1,1,1);
-	m_label_username_page4.set_hexpand(true);
-	m_label_username_page4.set_halign(Gtk::ALIGN_END);
-	m_label_username_page4.set_valign(Gtk::ALIGN_END);
+	m_grid_page4.attach(m_label_dbname_page4,0,1,1,1);
+	m_label_dbname_page4.set_hexpand(true);
+	m_label_dbname_page4.set_halign(Gtk::ALIGN_END);
+	m_label_dbname_page4.set_valign(Gtk::ALIGN_START);
 
-	m_grid_page4.attach(m_label_password_page4,0,2,1,1);
-	m_label_password_page4.set_hexpand(true);
-	m_label_password_page4.set_vexpand(true);
-	m_label_password_page4.set_halign(Gtk::ALIGN_END);
-	m_label_password_page4.set_valign(Gtk::ALIGN_START);
+	m_grid_page4.attach(m_label_username_page4,0,2,1,1);
+	m_label_username_page4.set_hexpand(true);
+	m_label_username_page4.set_vexpand(true);
+	m_label_username_page4.set_halign(Gtk::ALIGN_END);
+	m_label_username_page4.set_valign(Gtk::ALIGN_START);
 
 	m_grid_page4.attach(m_entry_server_page4,1,0,1,1);
 	m_entry_server_page4.set_hexpand(true);
@@ -128,30 +128,31 @@ ScpAssistant::ScpAssistant():
 	m_entry_server_page4.set_halign(Gtk::ALIGN_START);
 	m_entry_server_page4.set_valign(Gtk::ALIGN_END);
 
-	m_grid_page4.attach(m_entry_username_page4,1,1,1,1);
-	m_entry_username_page4.set_hexpand(true);
-	m_entry_username_page4.set_halign(Gtk::ALIGN_START);
-	m_entry_username_page4.set_valign(Gtk::ALIGN_END);
+	m_grid_page4.attach(m_entry_dbname_page4,1,1,1,1);
+	m_entry_dbname_page4.set_hexpand(true);
+	m_entry_dbname_page4.set_halign(Gtk::ALIGN_START);
+	m_entry_dbname_page4.set_valign(Gtk::ALIGN_START);
 
-	m_grid_page4.attach(m_entry_password_page4,1,2,1,1);
-	m_entry_password_page4.set_hexpand(true);
-	m_entry_password_page4.set_vexpand(true);
-	m_entry_password_page4.set_halign(Gtk::ALIGN_START);
-	m_entry_password_page4.set_valign(Gtk::ALIGN_START);
+	m_grid_page4.attach(m_entry_username_page4,1,2,1,1);
+	m_entry_username_page4.set_hexpand(true);
+	m_entry_username_page4.set_vexpand(true);
+	m_entry_username_page4.set_halign(Gtk::ALIGN_START);
+	m_entry_username_page4.set_valign(Gtk::ALIGN_START);
 
 	m_grid_page4.set_row_spacing(10);	
 	m_grid_page4.set_column_spacing(10);	
 	m_label_server_page4.set_text("Database server");
-	m_label_password_page4.set_text("Password");
+	m_label_dbname_page4.set_text("Database name");
 	m_label_username_page4.set_text("Username");
-	m_entry_password_page4.set_visibility(false);	
-	m_entry_password_page4.set_invisible_char('*');
 
 	m_entry_server_page4.signal_changed().connect(sigc::mem_fun(*this,
-				&ScpAssistant::on_entries_server_password_changed));
+				&ScpAssistant::on_entries_server_dbname_changed));
 	
-	m_entry_password_page4.signal_changed().connect(sigc::mem_fun(*this,
-				&ScpAssistant::on_entries_server_password_changed));
+	m_entry_dbname_page4.signal_changed().connect(sigc::mem_fun(*this,
+				&ScpAssistant::on_entries_server_dbname_changed));
+	
+	m_entry_username_page4.signal_changed().connect(sigc::mem_fun(*this,
+				&ScpAssistant::on_entries_server_dbname_changed));
 // page 5
 	show_all_children();
 }
@@ -227,9 +228,9 @@ ScpAssistant::on_combobox_page2_changed()
 }
 
 void
-ScpAssistant::on_entries_server_password_changed()
+ScpAssistant::on_entries_server_dbname_changed()
 {
-	if(	m_entry_password_page4.get_text_length() > 0 && 
+	if(	m_entry_dbname_page4.get_text_length() > 0 && 
 		m_entry_server_page4.get_text_length() > 0 &&
 		m_entry_username_page4.get_text_length() > 0)
 	{

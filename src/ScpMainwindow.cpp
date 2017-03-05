@@ -21,6 +21,7 @@
 #include <iostream>
 
 #include "ScpMainwindow.hpp" 
+#include "ScpApplication.hpp"
 
 ScpMainwindow::ScpMainwindow():
 m_paned_main(Gtk::ORIENTATION_HORIZONTAL),
@@ -64,16 +65,10 @@ m_button_add_version("Add Version")
   // This Action Map uses a "win." prefix for the actions.
   // Therefore, for instance, "win.new", is used in ExampleApplication::on_startup()
   // to layout the menu.
-	add_action("connect",
-		sigc::mem_fun(*this, &ScpMainwindow::on_action_connect) );
+/*	add_action("connect",
+		sigc::mem_fun(*this, &ScpApplication::on_action_connect) );
 	add_action("disconnect",
-		sigc::mem_fun(*this, &ScpMainwindow::on_action_disconnect) );
-	add_action("cut",
-		sigc::mem_fun(*this, &ScpMainwindow::on_action_something) );
-	add_action("copy",
-		sigc::mem_fun(*this, &ScpMainwindow::on_action_something) );
-	add_action("paste",
-		sigc::mem_fun(*this, &ScpMainwindow::on_action_something) );
+		sigc::mem_fun(*this, &ScpApplication::on_action_disconnect) );*/
 	add_action("send-note",
 		sigc::mem_fun(*this, &ScpMainwindow::on_action_send_notification) );
 	add_action("withdraw-note",
@@ -84,18 +79,6 @@ m_button_add_version("Add Version")
 
 
 	show_all_children();
-}
-
-void ScpMainwindow::on_action_connect()
-{
-  std::cout << G_STRFUNC << std::endl;
-}
-
-void ScpMainwindow::on_action_close()
-{
-  std::cout << G_STRFUNC << std::endl;
-
-  hide();
 }
 
 void ScpMainwindow::on_action_send_notification()
@@ -124,5 +107,8 @@ ScpMainwindow::set_keyfilename(const Glib::RefPtr<Gio::File> file)
 	else
 		m_reffile = file;
 }
+
+
+
 
 

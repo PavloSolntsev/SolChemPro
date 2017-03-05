@@ -21,8 +21,10 @@
 
 #include <gtkmm.h>
 #include "ScpAssistant.hpp"
+#include "ScpMainwindow.hpp"
+#include <libgdamm.h>
 
-class ScpApplication: public Gtk::Application
+class ScpApplication final: public Gtk::Application
 {
 	protected:
 		ScpApplication();
@@ -30,22 +32,25 @@ class ScpApplication: public Gtk::Application
 	public:
 		static Glib::RefPtr<ScpApplication> create();
 
-	protected:
 	//Overrides of default signal handlers:
 		void on_activate() override;
 		void on_startup() override;
+	    void on_action_connect();
+	    void on_action_disconnect();
 		  
 	private:
 		Glib::KeyFile m_keyfile;		
 		Glib::ustring inifilepath;
+		Glib::RefPtr<Gnome::Gda::Connection> m_refConnection;	
 		void create_window();
 	    void on_window_hide(Gtk::Window* window);
-	    void on_action_preferences();
 	    void on_action_quit();
 	    void on_action_print(const Glib::VariantBase& parameter);
 		bool first_time_start();
 		void write_preferences();
+		void esteblish_connection_to_db(); 
 		ScpAssistant m_assistant;		
+		ScpMainwindow *m_refWindow;
 };
 		  
 #endif /* SCP_APPLICATION_HPP_ */

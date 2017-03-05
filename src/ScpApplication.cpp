@@ -23,10 +23,6 @@
 #include <iostream>
 #include <config.h>
 
-
-static const Glib::ustring KEYFILEGROUP("GLOBAL");
-static const Glib::ustring KEYFILEKEY("START_CHECK");
-
 ScpApplication::ScpApplication()
 : Gtk::Application("org.gtkmm.solchempro")
 {
@@ -48,14 +44,17 @@ void ScpApplication::on_startup()
 
 //Create the Application menu:
 //We can use add_action because Gtk::Application derives from ActionMap:
-  add_action("preferences",
-    sigc::mem_fun(*this, &ScpApplication::on_action_preferences) );
+  add_action("connect",
+    sigc::mem_fun(*this, &ScpApplication::on_action_connect) );
+  add_action("disconnect",
+    sigc::mem_fun(*this, &ScpApplication::on_action_disconnect) );
   add_action("quit",
     sigc::mem_fun(*this, &ScpApplication::on_action_quit) );
 
 
   auto app_menu = Gio::Menu::create();
-  app_menu->append("_Preferences", "app.preferences");
+  app_menu->append("_Connect", "app.connect");
+  app_menu->append("_Disconnect", "app.disconnect");
   app_menu->append("_Quit", "app.quit");
 
   set_app_menu(app_menu);
@@ -112,7 +111,9 @@ void ScpApplication::create_window()
 				parentdir->make_directory_with_parents();
 
 			GFileini->create_file(Gio::FILE_CREATE_REPLACE_DESTINATION);
-			m_keyfile.set_boolean(KEYFILEGROUP,KEYFILEKEY,true);	
+			m_keyfile.set_boolean( ScpKeyfile::GROUP_GENERAL,
+			                       ScpKeyfile::KEY_STARTCHECK,
+                                   true);
 			// TODO: check return value for save_to_file() functin
 			m_keyfile.save_to_file(inifilepath); 
 		}catch (Gio::Error &e){
@@ -126,7 +127,9 @@ void ScpApplication::create_window()
 //		m_keyfile.save_to_file(inifilepath); 
 		try{
 			m_keyfile.load_from_file(inifilepath);
-			m_keyfile.set_boolean(KEYFILEGROUP,KEYFILEKEY,true);	
+			m_keyfile.set_boolean(ScpKeyfile::GROUP_GENERAL,
+                                  ScpKeyfile::KEY_STARTCHECK,
+                                  true);	
 			// TODO: check return value for save_to_file() functin
 			m_keyfile.save_to_file(inifilepath); 
 		}catch(Glib::FileError &e){
@@ -138,19 +141,19 @@ void ScpApplication::create_window()
 		}
 	}
 
-  auto window = new ScpMainwindow();
-  window->set_default_size(300, 100);
-  window->set_keyfilename(GFileini);
+  m_refWindow = new ScpMainwindow();
+  m_refWindow->set_default_size(800, 600);
+  m_refWindow->set_keyfilename(GFileini);
 
   //Make sure that the application runs for as long this window is still open:
-  add_window(*window);
+  add_window(*m_refWindow);
 
   //Delete the window when it is hidden.
   //That's enough for this simple example.
-  window->signal_hide().connect(sigc::bind(sigc::mem_fun(*this,
-    &ScpApplication::on_window_hide), window));
+  m_refWindow->signal_hide().connect(sigc::bind(sigc::mem_fun(*this,
+    &ScpApplication::on_window_hide), m_refWindow));
 
-  window->show();
+  m_refWindow->show();
 }
 
 void ScpApplication::on_window_hide(Gtk::Window* window)
@@ -163,7 +166,8 @@ void ScpApplication::on_activate()
 	try{
 		m_keyfile.load_from_file(inifilepath,Glib::KEY_FILE_KEEP_TRANSLATIONS);
 		
-		if(!m_keyfile.get_boolean(KEYFILEGROUP,KEYFILEKEY))
+		if(!m_keyfile.get_boolean(ScpKeyfile::GROUP_GENERAL,
+                                  ScpKeyfile::KEY_STARTCHECK))
 			first_time_start();
 
 	}catch(Glib::KeyFileError &e)
@@ -188,11 +192,6 @@ void ScpApplication::on_activate()
 	
 	if(!m_assistant.is_visible())
 		create_window();
-}
-
-void ScpApplication::on_action_preferences()
-{
-  std::cout << G_STRFUNC << std::endl;
 }
 
 void ScpApplication::on_action_quit()
@@ -269,3 +268,88 @@ ScpApplication::write_preferences()
 							 m_assistant.get_user());
 	}
 }
+
+
+void 
+ScpApplication::on_action_connect()
+{
+// Get password from user
+	if(!m_refConnection){
+		esteblish_connection_to_db();
+	}
+	else{
+		if(m_refConnection->is_opened()){
+			Gtk::MessageDialog dialog(*m_refWindow,
+									"Connection already established",
+									true,
+									Gtk::MESSAGE_INFO,
+									Gtk::BUTTONS_CLOSE,
+									true);
+			int res = dialog.run();
+			switch(res){
+				case Gtk::RESPONSE_CLOSE:
+					break;
+				default:
+					;
+			}
+		}
+		else{
+			esteblish_connection_to_db();
+		}
+	}
+}
+
+
+void ScpApplication::on_action_disconnect()
+{
+	if(m_refConnection)
+	{
+		if(m_refConnection->is_opened())
+		{
+			m_refConnection->close();
+		}
+		else
+		{
+			Gtk::MessageDialog dialog(*m_refWindow,
+									"Nothing to disconnect from",
+									true,
+									Gtk::MESSAGE_INFO,
+									Gtk::BUTTONS_CLOSE,
+									true);
+			int res = dialog.run();
+			switch(res){
+				case Gtk::RESPONSE_CLOSE:
+					break;
+				default:
+					;
+			}
+		}
+	}
+	else
+	{
+		Gtk::MessageDialog dialog(*m_refWindow,
+								"Nothing to disconnect from",
+								true,
+								Gtk::MESSAGE_INFO,
+								Gtk::BUTTONS_CLOSE,
+								true);
+		int res = dialog.run();
+		switch(res){
+			case Gtk::RESPONSE_CLOSE:
+				break;
+			default:
+				;
+		}
+	}
+				
+}
+
+
+void 
+ScpApplication::esteblish_connection_to_db()
+{
+
+
+}
+
+

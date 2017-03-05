@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with glade 3.20.0 
+
+Copyright (C) Pavlo Solntsev 2017
+
+This file is part of SolChemPro.
+
+SolChemPro is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+SolChemPro is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with SolChemPro.  If not, see <http://www.gnu.org/licenses/>.
+
+Author: Pavlo Solntsev <pavlo.solntsev@gmail.com>
+
+-->
+<interface>
+  <requires lib="gtk+" version="3.20"/>
+  <!-- interface-license-type gplv3 -->
+  <!-- interface-name SolChemPro -->
+  <!-- interface-description Chemical formulator -->
+  <!-- interface-copyright Pavlo Solntsev 2017 -->
+  <!-- interface-authors Pavlo Solntsev <pavlo.solntsev@gmail.com> -->
+  <object class="GtkApplicationWindow" id="main_window">
+    <property name="can_focus">False</property>
+    <property name="title" translatable="yes">SolChemPro</property>
+    <property name="default_width">800</property>
+    <property name="default_height">600</property>
+    <property name="has_resize_grip">True</property>
+    <child>
+      <object class="GtkPaned" id="paned1">
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <child>
+          <object class="GtkGrid">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <child>
+              <object class="GtkScrolledWindow">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="hexpand">True</property>
+                <property name="vexpand">True</property>
+                <property name="shadow_type">in</property>
+                <child>
+                  <object class="GtkTreeView" id="treeview_project">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <child internal-child="selection">
+                      <object class="GtkTreeSelection"/>
+                    </child>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkActionBar" id="action_bar_project">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">0</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="resize">True</property>
+            <property name="shrink">False</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkPaned">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="orientation">vertical</property>
+            <child>
+              <object class="GtkGrid">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <child>
+                  <object class="GtkScrolledWindow">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="shadow_type">in</property>
+                    <property name="propagate_natural_height">True</property>
+                    <child>
+                      <object class="GtkTreeView" id="treeview_sheet">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="vexpand">True</property>
+                        <child internal-child="selection">
+                          <object class="GtkTreeSelection"/>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">0</property>
+                    <property name="top_attach">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkActionBar" id="action_bar_sheet">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="hexpand">True</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">0</property>
+                    <property name="top_attach">0</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="resize">False</property>
+                <property name="shrink">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkNotebook" id="notebook1">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <child>
+                  <object class="GtkScrolledWindow">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="shadow_type">in</property>
+                    <property name="propagate_natural_height">True</property>
+                    <child>
+                      <object class="GtkTextView" id="textview_details">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child type="tab">
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">Details</property>
+                  </object>
+                  <packing>
+                    <property name="tab_fill">False</property>
+                    <property name="reorderable">True</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkScrolledWindow">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="shadow_type">in</property>
+                    <child>
+                      <object class="GtkTextView" id="textview_log">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child type="tab">
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">Log of changes</property>
+                  </object>
+                  <packing>
+                    <property name="position">1</property>
+                    <property name="tab_fill">False</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="resize">True</property>
+                <property name="shrink">True</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="resize">True</property>
+            <property name="shrink">True</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkPopoverMenu" id="popovermenu_edit">
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkSearchBar">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="search_mode_enabled">True</property>
+        <property name="show_close_button">True</property>
+        <child>
+          <object class="GtkSearchEntry">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="primary_icon_name">edit-find-symbolic</property>
+            <property name="primary_icon_activatable">False</property>
+            <property name="primary_icon_sensitive">False</property>
+          </object>
+        </child>
+      </object>
+      <packing>
+        <property name="submenu">main</property>
+        <property name="position">1</property>
+      </packing>
+    </child>
+  </object>
+  <object class="GtkHeaderBar" id="mainwindow_headerbar">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="title">SolChemPro</property>
+    <property name="has_subtitle">False</property>
+    <property name="show_close_button">True</property>
+    <child>
+      <object class="GtkButton" id="headerbar_button_newproject">
+        <property name="label" translatable="yes">New Project</property>
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="receives_default">False</property>
+        <property name="tooltip_text" translatable="yes">Create a New project</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuButton" id="menubutton_serach">
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="receives_default">True</property>
+        <property name="popover">popovermenu_edit</property>
+        <child>
+          <object class="GtkImage">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="stock">gtk-justify-fill</property>
+          </object>
+        </child>
+      </object>
+      <packing>
+        <property name="pack_type">end</property>
+        <property name="position">1</property>
+      </packing>
+    </child>
+  </object>
+</interface>

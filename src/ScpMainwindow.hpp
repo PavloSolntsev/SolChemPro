@@ -22,8 +22,9 @@
 #define SCP_MAINWINDOW_HPP_ 
 
 #include <gtkmm.h>
+#include <libgdamm.h>
 
-class ScpMainwindow: public Gtk::ApplicationWindow
+class ScpMainwindow final : public Gtk::ApplicationWindow
 {
 	public:
 		explicit ScpMainwindow();
@@ -47,19 +48,16 @@ class ScpMainwindow: public Gtk::ApplicationWindow
 		Gtk::ScrolledWindow m_scrolledwindow_sheet;
 		Gtk::TreeView m_treeview_sheet;
 
-
 		Gtk::Notebook m_notebook;
 		Gtk::ScrolledWindow m_scrolledwindow_details;
 		Gtk::ScrolledWindow m_scrolledwindow_log;
 		Gtk::TextView m_textview_details;
 		Gtk::TextView m_textview_log;
+		Glib::RefPtr<Gio::File> m_reffile;
 
-
-		void on_action_something();
-		void on_action_close();
+// Callback functions
 		void on_action_send_notification();
 		void on_action_withdraw_notification();
-		Glib::RefPtr<Gio::File> m_reffile;
 
 };
 

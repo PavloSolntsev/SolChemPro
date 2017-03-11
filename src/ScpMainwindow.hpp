@@ -53,7 +53,7 @@ class ScpMainwindow final : public Gtk::ApplicationWindow
 		Gtk::ScrolledWindow m_scrolledwindow_log;
 		Gtk::TextView m_textview_details;
 		Gtk::TextView m_textview_log;
-		Glib::RefPtr<Gio::File> m_reffile;
+		Glib::RefPtr<Gio::File> m_reffile; /* Key file name */
 
 // Callback functions
 		void on_action_send_notification();

@@ -39,6 +39,7 @@ class ScpAssistant : public Gtk::Assistant
 		void on_server_enrty_changed();
 		void on_password_enrty_changed();
 		void on_entries_server_dbname_changed();
+		void on_file_set_page3_changed();
 		Glib::ustring &get_dbtype();
 		Glib::ustring get_dbfile();
 		Glib::ustring get_server();
@@ -51,17 +52,25 @@ class ScpAssistant : public Gtk::Assistant
 		Gtk::ComboBox m_combobox_page2;
 		
 		// page3 for SQLite3 
+		Gtk::Label m_label_page3;
+		Gtk::Grid m_grid_page3;
 		Gtk::FileChooserButton m_filechbutton_page3;
+		Gtk::CheckButton m_checkbutton_connect_page3;
 		// page4 Server database 
+		Gtk::Label m_label_massage_page4;
 		Gtk::Grid m_grid_page4;
 		Gtk::Label m_label_server_page4;
 		Gtk::Label m_label_dbname_page4;
 		Gtk::Label m_label_username_page4;
+		Gtk::CheckButton m_checkbutton_connect_page4;
 
 		Gtk::Entry m_entry_server_page4;
 		Gtk::Entry m_entry_dbname_page4;
 		Gtk::Entry m_entry_username_page4;
 		// Page 5
+		Gtk::Label m_label_confirm;		
+
+
 
 		class ComboModelPage2 : public Gtk::TreeModelColumnRecord
 		{

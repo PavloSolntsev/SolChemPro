@@ -22,6 +22,7 @@
 #include "ScpKeyfile.hpp"
 #include <iostream>
 #include <config.h>
+#include "ScpEnum.hpp"
 
 ScpApplication::ScpApplication()
 : Gtk::Application("org.gtkmm.solchempro")
@@ -69,7 +70,7 @@ void ScpApplication::on_startup()
   win_menu->append_submenu("Network", submenu_file);
 
   auto submenu_edit = Gio::Menu::create();
-  submenu_edit->append("_Cut", "win.cut");
+    submenu_edit->append("_Cut", "win.cut");
   auto item = Gio::MenuItem::create("_Copy", "win.copy");
   //Setting "accel" works, but might be deprecated soon: See https://bugzilla.gnome.org/show_bug.cgi?id=708908
   //When it is deprecated, use Gtk::Application::set_accel_for_action() instead.
@@ -156,7 +157,7 @@ void ScpApplication::create_window()
   m_refWindow->show();
 }
 
-void ScpApplication::on_window_hide(Gtk::Window* window)
+id ScpApplication::on_window_hide(Gtk::Window* window)
 {
   delete window;
 }
@@ -348,6 +349,146 @@ void ScpApplication::on_action_disconnect()
 void 
 ScpApplication::esteblish_connection_to_db()
 {
+// Check if user is allowed to connect to the database
+// This can be done by reading all users from table allowed_users and checking the
+// Presence of the current user in that table
+/* The algorithm should be follow:
+ * 1) Esteblish connection to DB
+ * 2) Check if "allowed_user" table is available:
+ *      2.1) If this table is not available, it means we have a first start
+ *           the allowed_users table should be created;
+ *      2.2) If table is available, read users from the table
+ *      2.3) Check if the current user is listed in the database
+ *      2.4) If not listed report message and stay disconnected
+ *
+ *
+ *
+ * */
+    if(!m_refConnection->is_open())
+        return;
+
+    Glib::ustring provider_name;
+    Glib::ustring cnc_string;
+    Glib::ustring auth_string;
+    Glib::ustring dir_path;
+    Glib::ustring options_string;
+
+/* Read KeyFile */
+    try{
+        m_keyfile.load_from_file(inifilepath);
+
+    }catch(Glib::KeyFileError &e){
+        std::cerr << "Error with reading Keyfile" << std::endl;
+        std::cerr << e.what() << std::endl;
+        return;
+    }catch(Glib::FileError &e){
+        std::cerr << "Error with reading Keyfile" << std::endl;
+        std::cerr << e.what() << std::endl;
+        return;
+    }
+
+    Scp::DatabaseType server_id = m_assistant.get_server_id();
+
+    switch(server_id)
+    {
+        case Scp::SQLITE3: /* SQLite3 */
+        {
+            /* Read settings from ini file */
+            Glib::ustring dbfile(m_keyfile.get_string(ScpKeyfile::GROUP_CONNECTION,
+                                                      ScpKeyfile::KEY_DBFILE));
+            provider_name = "SQLite";
+            cnc_string = Glib::ustring::compose("DB_DIR=%1;DB_NAME=%2",
+                                        Glib::path_get_dirname(dbfile),
+                                        Glib::path_get_basename(dbfile));
+        }
+            break;
+        case 2: /* MySQL */
+        {
+            /* Read settings from ini file */
+            provider_name = "MySQL";
+            
+            cnc_string = Glib::ustring::compose("HOST=%1;DB_NAME=%1",
+                                       m_keyfile.get_string(ScpKeyfile::GROUP_CONNECTION,
+                                                            ScpKeyfile::KEY_SERVER),
+                                       m_keyfile.get_string(ScpKeyfile::GROUP_CONNECTION,
+                                                            ScpKeyfile::KEY_DBNAME));
+            
+            Glib::ustring username = m_keyfile.get_string( ScpKeyfile::GROUP_CONNECTION,
+                                                           ScpKeyfile::KEY_USERNAME)
+
+            Gtk::Dialog password_dialog(Glib::ustring::compose("Enter password for %1",username),
+                                        *this,
+                                        Gtk::DIALOG_MODAL);
+
+            auto pBoxDialog = password_dialog.get_content_area();
+
+            if(pBoxDialog == nullptr)
+            {
+                std::cerr << "Can't start password dialog. Exit" << std::endl;
+                return ;
+            }
+            
+            Gtk::Entry password_line;
+            password_line.set_visibility(false);
+
+            pBoxDialog->pack_start(password_line,true,true);
+        
+            password_dialog.add_button("&Ok",Gtk::RESPONSE_OK);             
+            password_dialog.add_button("&Cancel",Gtk::RESPONSE_CANCEL);             
+
+            auto response_id = password_dialog.run();
+            Glib::ustring password_str;
+
+            switch (response_id) {
+                case Gtk::RESPONSE_OK:
+                    password_str = password_line.get_text();         
+                    break;
+                case Gtk::RESPONSE_CANCEL:
+                    return;
+                    break;
+                default:
+                    break;
+            }
+
+            auth_string = Glib::ustring::compose("USERNAME=%1,PASSWORD=%2",
+                                                 username,
+                                                 password_str);
+                                                        
+        }
+            break;
+        case 3:/* PostgreSQL */
+            {}
+            break;
+        default: /* It is impossible. It means ini file was modified manually */
+            {}
+            break;
+    } // end of switch
+
+/*Open connection */
+/*! TODO: Exceptions probably should be used here. We need to rewrite this section
+ *  \todo Exceptions probably should be used here. We need to rewrite this section
+ */
+    m_refConnection = Gnome::Gda::Connection::open_from_string(provider_name,
+                                                               cnc_string,
+                                                               auth_string); 
+/* As fourth paramter we can pass a parameter for read only mode 
+ * Gtk::CONNECTION_OPTIONS_READ_ONLY 
+ * */
+    
+    if(m_refConnection == 0) {
+            Gtk::MessageDialog dialog(*this,
+                                      dialogmessage,
+                                      true,
+                                      Gtk::MESSAGE_WARNING,
+                                      Gtk::BUTTONS_CLOSE,
+                                      true);
+            dialog.run();
+    }
+
+/* Read users from database  */
+    
+
+
 
 
 }

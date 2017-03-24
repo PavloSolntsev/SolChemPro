@@ -73,10 +73,14 @@ ScpAssistant::ScpAssistant():
 	signal_prepare().connect(sigc::mem_fun(*this,
 				&ScpAssistant::on_assistant_prepare));
 // Page 2 	
-	m_vendors_page2.insert(std::pair<int,Glib::ustring>(0,"<Select Item>"));
-	m_vendors_page2.insert(std::pair<int,Glib::ustring>(1,"SQLite3"));
-	m_vendors_page2.insert(std::pair<int,Glib::ustring>(2,"MySQL"));
-	m_vendors_page2.insert(std::pair<int,Glib::ustring>(3,"PostgreSQL"));
+	m_vendors_page2.insert(std::pair<Scp::DatabaseType,Glib::ustring>(Scp::UNDEFINED,
+                                                                      "<Select Item>"));
+	m_vendors_page2.insert(std::pair<Scp::DatabaseType,Glib::ustring>(Scp::SQLITE3,
+                                                                      "SQLite3"));
+	m_vendors_page2.insert(std::pair<Scp::DatabaseType,Glib::ustring>(Scp::MYSQL,
+                                                                      "MySQL"));
+	m_vendors_page2.insert(std::pair<Scp::DatabaseType,Glib::ustring>(Scp::POSTGRESQL,
+                                                                      "PostgreSQL"));
 
 	m_refmodel_page2 = Gtk::ListStore::create(model_columns_page2);
 	m_combobox_page2.set_model(m_refmodel_page2);
@@ -88,10 +92,10 @@ ScpAssistant::ScpAssistant():
 		row = *(m_refmodel_page2->append());
 		row[model_columns_page2.m_id] = i.first;
 		row[model_columns_page2.m_name] = i.second;
-		if(i.first == 0)
+		if(i.first == Scp::UNDEFINED)
 		{
 			m_combobox_page2.set_active(row);
-			m_server_id = 0;
+			m_server_id = Scp::UNDEFINED;
 		}
 	}
 	
@@ -253,7 +257,7 @@ ScpAssistant::on_assistant_prepare(Gtk::Widget *widget)
 	set_title(Glib::ustring::compose("Gtk::Assistant example (Page %1 of %2)",
 	     get_current_page() + 1, get_n_pages()));
 
-    if(get_current_page() == 2 && m_server_id == 1)
+    if(get_current_page() == 2 && m_server_id == Scp::SQLITE3)
     {
 		set_page_complete(m_grid_page4,true);
     }
@@ -267,7 +271,7 @@ ScpAssistant::on_assistant_prepare(Gtk::Widget *widget)
         buffer = Glib::ustring::compose("You will be using %1 database\n",
                 m_vendors_page2.at(m_server_id));
 
-        if(m_server_id == 1)
+        if(m_server_id == Scp::SQLITE3)
         {
             buffer += Glib::ustring::compose("Database will be taken from file %1\n",
                     Glib::path_get_basename(m_filechbutton_page3.get_filename()));
@@ -315,7 +319,7 @@ ScpAssistant::on_combobox_page2_changed()
 	set_page_complete(m_grid_page4,false);
 	set_page_complete(m_label_confirm,false);
 
-	if(m_server_id != 1)/* Insert SQLite3 db selection table */
+	if(m_server_id != Scp::SQLITE3)/* Insert SQLite3 db selection table */
 	{
 		m_filechbutton_page3.set_sensitive(false);
 		m_checkbutton_connect_page3.set_sensitive(false);
@@ -343,7 +347,7 @@ ScpAssistant::on_entries_server_dbname_changed()
 	if(	m_entry_dbname_page4.get_text_length() > 0 && 
 		m_entry_server_page4.get_text_length() > 0 &&
 		m_entry_username_page4.get_text_length() > 0 &&
-		m_server_id != 1)
+		m_server_id != Scp::SQLITE3)
 	{
 		set_page_complete(m_grid_page4,true);
 	}
@@ -383,3 +387,13 @@ ScpAssistant::on_file_set_page3_changed()
 	set_page_complete(m_grid_page3,true);
 
 }
+
+
+Scp::DatabaseType 
+ScpAssistant::get_server_id()
+{
+    return m_server_id;
+}
+
+
+

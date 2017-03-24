@@ -22,6 +22,8 @@
 #include <gtkmm.h>
 #include <iostream>
 #include <map>
+#include "ScpEnum.hpp"
+
 
 class ScpAssistant : public Gtk::Assistant
 {
@@ -43,6 +45,7 @@ class ScpAssistant : public Gtk::Assistant
 		Glib::ustring &get_dbtype();
 		Glib::ustring get_dbfile();
 		Glib::ustring get_server();
+        Scp::DatabaseType get_server_id();
 		Glib::ustring get_user();
 
 	private:
@@ -80,16 +83,16 @@ class ScpAssistant : public Gtk::Assistant
 					add(m_name);
 				}
 
-				Gtk::TreeModelColumn<int> m_id;
+				Gtk::TreeModelColumn<Scp::DatabaseType> m_id;
 				Gtk::TreeModelColumn<Glib::ustring> m_name;
 		}model_columns_page2;
 
 		Glib::RefPtr<Gtk::ListStore> m_refmodel_page2;	
-		std::map<int,Glib::ustring> m_vendors_page2;
+		std::map<Scp::DatabaseType,Glib::ustring> m_vendors_page2;
 		
 		void print_status();
 		
-		int m_server_id;
+        Scp::DatabaseType m_server_id;
 };
 
 

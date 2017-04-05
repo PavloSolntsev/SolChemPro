@@ -1,4 +1,28 @@
-2017-03-04  Pavlo Solntsev <pavlo.solntsev@gmail.com>
+2017-04-05 Pavlo Solntsev <pavlo.solntsev@gmail.com>
 
-	* Initial repo with some progress
+    *  (HEAD -> master)DB connection function was implemented + additional functions
+
+2017-03-23 Pavlo Solntsev <pavlo.solntsev@gmail.com>
+
+    * All enums will be in a separate file. Connection can be opened for SQLite and MySQL only
+
+2017-03-23 Pavlo Solntsev <pavlo.solntsev@gmail.com>
+
+    * Modification of page flow. This work is not done yet. Should be improved
+
+2017-03-11 Pavlo Solntsev <pavlo.solntsev@gmail.com>
+
+    * Some impovements in Assistant class. We still have an issue with page flow. This class should be polished.
+
+2017-03-04 Pavlo Solntsev <pavlo.solntsev@gmail.com>
+
+    * actions were introduced to the ScpApplication. Gda::Connection object was added to the ScpApplication object. Connection to the DB will be performed from the main Application
+
+2017-03-04 Pavlo Solntsev <pavlo.solntsev@gmail.com>
+
+    * 4 page was updated to include DB name. Password entry was removed. Some functions were renamed to reflect that changes
+
+2017-03-04 Pavlo Solntsev <pavlo.solntsev@gmail.com>
+
+    * Initial repo with some progress
 

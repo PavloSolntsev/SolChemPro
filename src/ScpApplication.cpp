@@ -157,7 +157,7 @@ void ScpApplication::create_window()
   m_refWindow->show();
 }
 
-id ScpApplication::on_window_hide(Gtk::Window* window)
+void ScpApplication::on_window_hide(Gtk::Window* window)
 {
   delete window;
 }
@@ -364,7 +364,7 @@ ScpApplication::esteblish_connection_to_db()
  *
  *
  * */
-    if(!m_refConnection->is_open())
+    if(!m_refConnection->is_opened())
         return;
 
     Glib::ustring provider_name;
@@ -414,11 +414,11 @@ ScpApplication::esteblish_connection_to_db()
                                                             ScpKeyfile::KEY_DBNAME));
             
             Glib::ustring username = m_keyfile.get_string( ScpKeyfile::GROUP_CONNECTION,
-                                                           ScpKeyfile::KEY_USERNAME)
+                                                           ScpKeyfile::KEY_USERNAME);
 
-            Gtk::Dialog password_dialog(Glib::ustring::compose("Enter password for %1",username),
-                                        *this,
-                                        Gtk::DIALOG_MODAL);
+            auto dialogtitle = Glib::ustring::compose("Enter password for %1",username);
+
+            Gtk::Dialog password_dialog(dialogtitle,*m_refWindow,Gtk::DIALOG_MODAL);
 
             auto pBoxDialog = password_dialog.get_content_area();
 
@@ -468,29 +468,118 @@ ScpApplication::esteblish_connection_to_db()
 /*! TODO: Exceptions probably should be used here. We need to rewrite this section
  *  \todo Exceptions probably should be used here. We need to rewrite this section
  */
-    m_refConnection = Gnome::Gda::Connection::open_from_string(provider_name,
-                                                               cnc_string,
-                                                               auth_string); 
 /* As fourth paramter we can pass a parameter for read only mode 
  * Gtk::CONNECTION_OPTIONS_READ_ONLY 
  * */
+    m_refConnection = Gnome::Gda::Connection::open_from_string(provider_name,
+                                                               cnc_string,
+                                                               auth_string); 
     
-    if(m_refConnection == 0) {
-            Gtk::MessageDialog dialog(*this,
-                                      dialogmessage,
+    if(!m_refConnection) 
+    {
+        Gtk::MessageDialog dialog(*m_refWindow,
+                                  "Can't establish connection to Database",
+                                  true,
+                                  Gtk::MESSAGE_WARNING,
+                                  Gtk::BUTTONS_CLOSE,
+                                  true);
+        dialog.run();
+    }
+
+/* Read users from database 
+ * User database is called <users>. 
+ *
+ * */
+   if(!table_exists("users")) 
+       create_users_table();
+    else
+    {
+        std::vector<Glib::ustring> res;
+    
+        Glib::ustring sql("SELECT name FROM users");
+        Glib::RefPtr<Gnome::Gda::DataModel> data_model;
+        data_model = m_refConnection->statement_execute_select (sql);
+        Glib::RefPtr<Gnome::Gda::DataModelIter> model_iter = data_model->create_iter();
+                    
+        bool searchres(false);
+        Glib::ustring buffer;
+
+        do{
+            if(model_iter->get_value_at(0).get_string() == m_keyfile.get_string(
+                                                                ScpKeyfile::GROUP_CONNECTION,
+                                                                ScpKeyfile::KEY_USERNAME))
+            {
+                searchres = true;
+            }
+        }while(model_iter->move_next());
+
+        if(!searchres)
+        {
+            Gtk::MessageDialog dialog(*m_refWindow,
+                                      "You are not allowed to access database",
                                       true,
                                       Gtk::MESSAGE_WARNING,
                                       Gtk::BUTTONS_CLOSE,
                                       true);
             dialog.run();
+        }
     }
-
-/* Read users from database  */
-    
-
-
-
 
 }
 
+bool 
+ScpApplication::create_users_table()
+{
+#ifdef DEBUG
+    std::cout << "Line " << __LINE__ << std::endl;
+#endif
+    const Glib::ustring sqlstr = "CREATE TABLE IF NOT EXISTS users"
+                                 "(user_id INT NOT NULL PRIMARY KEY,"
+                                 "name VARCHAR(255))";
+            
+    Glib::RefPtr<Gnome::Gda::SqlParser> parser;
+    parser = m_refConnection->create_parser();
+    if(!parser) 
+        parser = Gnome::Gda::SqlParser::create();
+      
+    Glib::RefPtr<Gnome::Gda::Statement> stmt;
+
+    stmt =  parser->parse_string (sqlstr);
+    m_refConnection->statement_execute_non_select (stmt);
+    
+    return true;
+}
+
+/* \brief Check if table exists
+ *
+ * \param table - table name
+ * \return true if table exists, otherwise - false
+ *
+ * */
+bool 
+ScpApplication::table_exists(const Glib::ustring table)
+{
+    try{
+        if(!m_refConnection->update_meta_store())
+        {
+            std::cerr << "Can't update meta store in " 
+                << __FILE__ << " at " << __LINE__ << std::endl;
+            return false;
+        }   
+    }catch(...)
+    {
+
+    }     
+     // End of TRY
+
+    Glib::RefPtr<Gnome::Gda::MetaStruct> refmetastruc = 
+        Gnome::Gda::MetaStruct::create(m_refConnection->get_meta_store(),
+                                       Gnome::Gda::META_STRUCT_FEATURE_NONE);
+
+    GdaMetaDbObject *dbo = refmetastruc->complement(Gnome::Gda::META_DB_TABLE,
+                                                    Gnome::Gda::Value(),
+                                                    Gnome::Gda::Value(),
+                                                    Gnome::Gda::Value(table));
+    return dbo ? true : false;
+}
 

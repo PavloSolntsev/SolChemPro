@@ -23,6 +23,7 @@
 #include "ScpAssistant.hpp"
 #include "ScpMainwindow.hpp"
 #include <libgdamm.h>
+#include "ScpEnum.hpp"
 
 class ScpApplication final: public Gtk::Application
 {
@@ -49,6 +50,8 @@ class ScpApplication final: public Gtk::Application
 		bool first_time_start();
 		void write_preferences();
 		void esteblish_connection_to_db(); 
+        bool create_users_table();
+        bool table_exists(const Glib::ustring);
 		ScpAssistant m_assistant;		
 		ScpMainwindow *m_refWindow;
 };

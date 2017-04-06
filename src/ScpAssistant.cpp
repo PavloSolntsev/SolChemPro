@@ -53,7 +53,7 @@ ScpAssistant::ScpAssistant():
 	set_page_title(*get_nth_page(4),"Summary");
 
 	set_page_complete(m_label_page1,true);
-	set_page_complete(m_grid_page2, true);
+	set_page_complete(m_grid_page2, false);
 	set_page_complete(m_grid_page3, false);
 	set_page_complete(m_grid_page4, false);
 	set_page_complete(m_label_confirm, false);
@@ -105,7 +105,6 @@ ScpAssistant::ScpAssistant():
 	m_filechbutton_page3.signal_file_set().connect(sigc::mem_fun(*this,
 				&ScpAssistant::on_file_set_page3_changed));
 
-
 	m_combobox_page2.pack_start(model_columns_page2.m_name);
 
 	m_grid_page2.attach(m_label_page2,0,0,1,1);
@@ -142,7 +141,7 @@ ScpAssistant::ScpAssistant():
 	m_checkbutton_connect_page3.set_label("Auto-connect?");
 	m_grid_page3.set_row_spacing(10);	
 	m_grid_page3.set_column_spacing(10);	
-	m_label_page3.set_text("Please skeep this step if you shose non SQLite3 Database");
+	m_label_page3.set_text("Please provide only username for SQLite3 Database");
 // Page 4
 	m_grid_page4.attach(m_label_massage_page4,0,0,2,1);
 	m_label_massage_page4.set_hexpand(true);
@@ -257,12 +256,6 @@ ScpAssistant::on_assistant_prepare(Gtk::Widget *widget)
 	set_title(Glib::ustring::compose("Gtk::Assistant example (Page %1 of %2)",
 	     get_current_page() + 1, get_n_pages()));
 
-    if(get_current_page() == 2 && m_server_id == Scp::SQLITE3)
-    {
-		set_page_complete(m_grid_page4,true);
-    }
-
-
 	// Settings for page 5(Last page)
 	if((get_current_page()+1) == get_n_pages())
 	{
@@ -315,7 +308,12 @@ ScpAssistant::on_combobox_page2_changed()
 		<< " Name: " << m_vendors_page2.at(m_server_id) << std::endl;
 	}
 
-	set_page_complete(m_grid_page3,false);
+    if(m_server_id != Scp::UNDEFINED)
+	    set_page_complete(m_grid_page2,true);
+    else
+	    set_page_complete(m_grid_page2,false);
+
+    set_page_complete(m_grid_page3,false);
 	set_page_complete(m_grid_page4,false);
 	set_page_complete(m_label_confirm,false);
 
@@ -337,7 +335,7 @@ ScpAssistant::on_combobox_page2_changed()
 //		set_page_complete(m_grid_page4,true);
 		m_entry_dbname_page4.set_editable(false);
 		m_entry_server_page4.set_editable(false);
-		m_entry_username_page4.set_editable(false);
+		m_entry_username_page4.set_editable(true);
 	}
 }
 
@@ -355,6 +353,10 @@ ScpAssistant::on_entries_server_dbname_changed()
 	{
 		set_page_complete(m_grid_page4,false);
 	}
+
+    if(m_server_id == Scp::SQLITE3 && m_entry_username_page4.get_text_length() > 0)
+        set_page_complete(m_grid_page4,true);
+
 }
 
 Glib::ustring& 
@@ -385,9 +387,7 @@ void
 ScpAssistant::on_file_set_page3_changed()
 {
 	set_page_complete(m_grid_page3,true);
-
 }
-
 
 Scp::DatabaseType 
 ScpAssistant::get_server_id()

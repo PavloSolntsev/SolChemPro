@@ -39,11 +39,11 @@ namespace ScpKeyfile
 	const Glib::ustring KEY_SERVER        = "SERVER";
 	const Glib::ustring KEY_USERNAME      = "USERNAME";
 	const Glib::ustring KEY_DBFILE        = "DBFILE";
+	const Glib::ustring KEY_DBTYPE_ID     = "DBTYPE_ID";
 
 	const Glib::ustring DBTYPE_SQLITE3    = "SQLite3";
 	const Glib::ustring DBTYPE_MYSQL      = "MySQL";
 	const Glib::ustring DBTYPE_POSTGRESQL = "PostgreSQL";
-
 }
 
 #endif

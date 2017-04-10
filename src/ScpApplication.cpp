@@ -27,6 +27,7 @@
 ScpApplication::ScpApplication()
 : Gtk::Application("org.gtkmm.solchempro")
 {
+    Gnome::Gda::init();
 	Glib::set_application_name("SolChemPro");
 	m_assistant.set_default_size(600,400);
 	inifilepath = Glib::build_filename(Glib::get_user_config_dir(),PACKAGE_TARNAME);
@@ -257,6 +258,14 @@ ScpApplication::write_preferences()
 		m_keyfile.set_string(ScpKeyfile::GROUP_CONNECTION,
 							 ScpKeyfile::KEY_DBFILE,
 							 m_assistant.get_dbfile());
+		
+        m_keyfile.set_string(ScpKeyfile::GROUP_CONNECTION,
+							 ScpKeyfile::KEY_USERNAME,
+							 m_assistant.get_user());
+        
+        m_keyfile.set_integer(ScpKeyfile::GROUP_CONNECTION,
+							 ScpKeyfile::KEY_DBTYPE_ID,
+							 m_assistant.get_server_id());
 	}
 	else
 	{
@@ -364,7 +373,7 @@ ScpApplication::esteblish_connection_to_db()
  *
  *
  * */
-    if(!m_refConnection->is_opened())
+    if(m_refConnection && m_refConnection->is_opened())
         return;
 
     Glib::ustring provider_name;
@@ -386,8 +395,11 @@ ScpApplication::esteblish_connection_to_db()
         std::cerr << e.what() << std::endl;
         return;
     }
+    
+    Scp::DatabaseType server_id = static_cast<Scp::DatabaseType>(
+                                        m_keyfile.get_integer(ScpKeyfile::GROUP_CONNECTION,
+                                                              ScpKeyfile::KEY_DBTYPE_ID));
 
-    Scp::DatabaseType server_id = m_assistant.get_server_id();
 
     switch(server_id)
     {
@@ -460,7 +472,10 @@ ScpApplication::esteblish_connection_to_db()
             {}
             break;
         default: /* It is impossible. It means ini file was modified manually */
-            {}
+            {
+                std::cout << "How it is possible!!" << std::endl;
+                return;
+            }
             break;
     } // end of switch
 
@@ -471,6 +486,11 @@ ScpApplication::esteblish_connection_to_db()
 /* As fourth paramter we can pass a parameter for read only mode 
  * Gtk::CONNECTION_OPTIONS_READ_ONLY 
  * */
+    std::cout << "PROVIDER NAME : " << provider_name << std::endl;
+    std::cout << "CNC STRING    : " << cnc_string << std::endl;
+    std::cout << "AUTH STRING   : " << auth_string << std::endl;
+
+
     m_refConnection = Gnome::Gda::Connection::open_from_string(provider_name,
                                                                cnc_string,
                                                                auth_string); 
@@ -484,6 +504,7 @@ ScpApplication::esteblish_connection_to_db()
                                   Gtk::BUTTONS_CLOSE,
                                   true);
         dialog.run();
+        return;
     }
 
 /* Read users from database 

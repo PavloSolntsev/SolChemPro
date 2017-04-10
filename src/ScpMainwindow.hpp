@@ -58,7 +58,7 @@ class ScpMainwindow final : public Gtk::ApplicationWindow
 // Callback functions
 		void on_action_send_notification();
 		void on_action_withdraw_notification();
-
+        void on_newproject_clicked();_
 };
 
 #endif /* GTKMM_EXAMPLEWINDOW_H */

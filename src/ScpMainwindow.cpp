@@ -73,7 +73,9 @@ m_button_add_version("Add Version")
 		sigc::mem_fun(*this, &ScpMainwindow::on_action_send_notification) );
 	add_action("withdraw-note",
 		sigc::mem_fun(*this, &ScpMainwindow::on_action_withdraw_notification) );
-
+    m_button_new_project.signal_clicked().connect(sigc::mem_fun(
+                                *this,
+                                ScpMainwindow::on_newproject_clicked));
 	
 
 
@@ -108,7 +110,15 @@ ScpMainwindow::set_keyfilename(const Glib::RefPtr<Gio::File> file)
 		m_reffile = file;
 }
 
+void
+ScpMainwindow::on_newproject_clicked()
+{
+    std::cout << "New project will be created" << std::end;
 
+    // Initiate new project
+    
+
+}
 
 
 

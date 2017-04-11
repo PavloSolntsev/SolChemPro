@@ -32,8 +32,14 @@ class ScpMainwindow final : public Gtk::ApplicationWindow
 		void set_keyfilename(const Glib::ustring& );
 		void set_keyfilename(const char *);
 		void set_keyfilename(const Glib::RefPtr<Gio::File> );
+// Signals
+        typedef sigc::signal<void> type_signal_new_project_button;
+        type_signal_new_project_button signal_new_project();
+
 
 	private:
+        type_signal_new_project_button m_signal_new_project_button;
+
 		Gtk::Paned m_paned_main;
 		Gtk::Paned m_paned_right;
 		Gtk::Button m_button_new_project;

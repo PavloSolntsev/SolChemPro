@@ -110,14 +110,20 @@ ScpMainwindow::set_keyfilename(const Glib::RefPtr<Gio::File> file)
 		m_reffile = file;
 }
 
+ScpMainwindow::type_signal_new_project_button
+ScpMainwindow::signal_new_project()
+{
+    return m_signal_new_project_button;
+}
+
+
+
 void
 ScpMainwindow::on_newproject_clicked()
 {
     std::cout << "New project will be created" << std::end;
 
-    // Initiate new project
-    
-
+    m_signal_new_project_button.emit();
 }
 
 

@@ -22,6 +22,7 @@
 
 #include "ScpMainwindow.hpp" 
 #include "ScpApplication.hpp"
+#include <iostream>
 
 ScpMainwindow::ScpMainwindow():
 m_paned_main(Gtk::ORIENTATION_HORIZONTAL),
@@ -75,7 +76,7 @@ m_button_add_version("Add Version")
 		sigc::mem_fun(*this, &ScpMainwindow::on_action_withdraw_notification) );
     m_button_new_project.signal_clicked().connect(sigc::mem_fun(
                                 *this,
-                                ScpMainwindow::on_newproject_clicked));
+                                &ScpMainwindow::on_newproject_clicked));
 	
 
 
@@ -121,7 +122,7 @@ ScpMainwindow::signal_new_project()
 void
 ScpMainwindow::on_newproject_clicked()
 {
-    std::cout << "New project will be created" << std::end;
+    std::cout << "New project will be created" << std::endl;
 
     m_signal_new_project_button.emit();
 }

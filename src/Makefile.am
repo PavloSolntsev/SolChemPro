@@ -47,9 +47,12 @@ solchempro_SOURCES = \
 	ScpEnum.hpp \
 	ScpTime.hpp \
 	ScpTime.cpp \
+<<<<<<< HEAD
 	ScpReccord.hpp \
 	ScpReccord.cpp \
 	ScpProject.hpp \
 	ScpProject.cpp \
+=======
+>>>>>>> b1fa8f55da1d465e9e16de4b24d9c912d7a5e3cf
 	$(NULL)
 

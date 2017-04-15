@@ -21,23 +21,27 @@
 #define _SCP_PROJECT_HPP
 
 #include <glibmm.h>
+#include "ScpReccord.hpp"
 
-class ScpProject 
+class ScpProject : public ScpReccord 
 {
     public:
         ScpProject()=default;
         virtual ~ScpProject() = default;
 
-        int get_id()const;
+        const int &get_id()const;
+        void set_id(const int &);
         const Glib::ustring &get_name()const;
+        void set_name(const Glib::ustring &);
         const Glib::ustring &get_description()const;
+        void set_description(const Glib::ustring &);
 
     protected:
         int m_id; /*!< unique key for SQL purpose. This key has a format 111xxxxxx */
         Glib::ustring m_name; /*!< Name of the project */
         Glib::ustring m_description; /*!< Description of the product */
-        Gnome::Gda::Timestamp m_starttime; /*!< Time when project was created */  
-        Gnome::Gda::Timestamp m_modtime;   /*!< Time when project was modified  */  
+        ScpTime m_starttime; /*!< Time when project was created */  
+        ScpTime m_modtime;   /*!< Time when project was modified  */  
 
 };
 

@@ -22,15 +22,23 @@
 
 #include <libgdamm.h>
 
+using namespace Gnome;
+
 class ScpTime {
     public:
-        ScpTime()=default;
+        ScpTime();
+        ScpTime(Glib::ustring);
+        ~ScpTime();
+        void set_string(const Glib::ustring);
+        const Glib::ustring get_string();
+        const Glib::ustring format(Glib::ustring);
+        ScpTime& operator=(const ScpTime &);
 
-        
+
     protected:
-};
-
-
+        Glib::TimeVal m_timeval;
+        Glib::DateTime m_datetime;
+};  
 
 #endif
 

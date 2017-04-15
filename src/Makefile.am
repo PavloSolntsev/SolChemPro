@@ -45,5 +45,7 @@ solchempro_SOURCES = \
 	ScpKeyfile.hpp \
 	solchempro.gresource.c \
 	ScpEnum.hpp \
+	ScpTime.hpp \
+	ScpTime.cpp \
 	$(NULL)
 

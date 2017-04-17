@@ -52,6 +52,7 @@ class ScpApplication final: public Gtk::Application
 		void esteblish_connection_to_db(); 
         bool create_users_table();
         bool table_exists(const Glib::ustring);
+        void on_newproject_clicked();
 		ScpAssistant m_assistant;		
 		ScpMainwindow *m_refWindow;
 };

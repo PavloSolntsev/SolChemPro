@@ -32,6 +32,8 @@ ScpApplication::ScpApplication()
 	m_assistant.set_default_size(600,400);
 	inifilepath = Glib::build_filename(Glib::get_user_config_dir(),PACKAGE_TARNAME);
 	inifilepath = Glib::build_filename(inifilepath,INIFILE);	
+
+
 }
 
 Glib::RefPtr<ScpApplication> ScpApplication::create()
@@ -143,6 +145,9 @@ void ScpApplication::create_window()
 		}
 	}
 
+    /*! TODO: Test pointer for nullptr value
+     *  \todo Test pointer for nullptr value
+     */
   m_refWindow = new ScpMainwindow();
   m_refWindow->set_default_size(800, 600);
   m_refWindow->set_keyfilename(GFileini);
@@ -154,6 +159,10 @@ void ScpApplication::create_window()
   //That's enough for this simple example.
   m_refWindow->signal_hide().connect(sigc::bind(sigc::mem_fun(*this,
     &ScpApplication::on_window_hide), m_refWindow));
+
+/* Connect all signals to the child widgets here */  
+  m_refWindow->signal_new_project().connect(
+            sigc::mem_fun(*this,&ScpApplication::on_newproject_clicked));
 
   m_refWindow->show();
 }
@@ -602,5 +611,12 @@ ScpApplication::table_exists(const Glib::ustring table)
                                                     Gnome::Gda::Value(),
                                                     Gnome::Gda::Value(table));
     return dbo ? true : false;
+}
+
+void
+ScpApplication::on_newproject_clicked()
+{
+    std::cout << "I will start new project" << std::endl;
+
 }
 

@@ -33,12 +33,6 @@ class ScpTime {
         const Glib::ustring get_string();
         const Glib::ustring format(Glib::ustring);
         ScpTime& operator=(const ScpTime &);
-<<<<<<< HEAD
-        
-=======
-
-
->>>>>>> b1fa8f55da1d465e9e16de4b24d9c912d7a5e3cf
     protected:
         Glib::TimeVal m_timeval;
         Glib::DateTime m_datetime;

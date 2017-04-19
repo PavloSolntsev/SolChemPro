@@ -23,6 +23,7 @@
 #include <iostream>
 #include <config.h>
 #include "ScpEnum.hpp"
+#include "ScpNewproject.hpp"
 
 ScpApplication::ScpApplication()
 : Gtk::Application("org.gtkmm.solchempro")
@@ -617,6 +618,28 @@ void
 ScpApplication::on_newproject_clicked()
 {
     std::cout << "I will start new project" << std::endl;
+    ScpNewproject newproject(*m_refWindow);
+    Glib::ustring project_name;
+    Glib::ustring project_discr;
 
+    int res = newproject.run();
+
+    switch (res) {
+        case Gtk::RESPONSE_OK:            
+            {
+                project_name = newproject.get_name();
+                project_discr = newproject.get_discription();
+            }            
+            break;
+        case Gtk::RESPONSE_CANCEL:
+            {
+            }
+            break;
+
+        default:
+            break;
+    }    
+    std::cout << "Project name is " << project_name << std::endl;
+    std::cout << "Project name is " << project_discr << std::endl;
 }
 

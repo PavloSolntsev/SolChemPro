@@ -19,19 +19,6 @@
 
 #include "ScpProject.hpp"
 
-const int &
-ScpProject::get_id()const
-{
-    return m_id;
-}
-
-void
-ScpProject::set_id(const int &id)
-{
-    m_id = id;
-}
-
-
 const Glib::ustring& 
 ScpProject::get_name()const
 {
@@ -55,4 +42,17 @@ ScpProject::set_description(const Glib::ustring &descr)
 {
     m_description = descr;
 }
+
+const long &
+ScpProject::get_id()const
+{
+    return m_id;
+}
+
+void 
+ScpProject::set_id(const long &id)
+{
+   m_id = id; 
+}
+
 

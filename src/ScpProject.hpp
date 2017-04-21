@@ -29,19 +29,17 @@ class ScpProject : public ScpReccord
         ScpProject()=default;
         virtual ~ScpProject() = default;
 
-        const int &get_id()const;
-        void set_id(const int &);
         const Glib::ustring &get_name()const;
         void set_name(const Glib::ustring &);
         const Glib::ustring &get_description()const;
         void set_description(const Glib::ustring &);
+        const long &get_id()const;
+        void set_id(const long &);
 
     protected:
-        int m_id; /*!< unique key for SQL purpose. This key has a format 111xxxxxx */
+        long m_id; /*!< unique key for SQL purpose. This key has a format 111xxxxxx */
         Glib::ustring m_name; /*!< Name of the project */
         Glib::ustring m_description; /*!< Description of the product */
-        ScpTime m_starttime; /*!< Time when project was created */  
-        ScpTime m_modtime;   /*!< Time when project was modified  */  
 
 };
 

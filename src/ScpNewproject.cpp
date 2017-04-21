@@ -17,9 +17,11 @@
  */
 
 #include "ScpNewproject.hpp"
+#include <string>
 
 ScpNewproject::ScpNewproject(Gtk::Window &parent):
     Gtk::Dialog("New Project Initialization",parent,true),
+    m_labelid("Project ID"),
     m_labelname("Project name"),
     m_labeldiscription("Discription")
 {
@@ -38,14 +40,18 @@ ScpNewproject::ScpNewproject(Gtk::Window &parent):
 
     m_grid.set_row_spacing(5);
     m_grid.set_column_spacing(3);
-    m_grid.attach(m_labelname,0,0,1,1);
+
+    m_grid.attach(m_labelid,0,0,1,1);
+    m_grid.attach(m_entryid,1,0,1,1);
+
+    m_grid.attach(m_labelname,0,1,1,1);
     m_labeldiscription.set_valign(Gtk::ALIGN_START);
     m_labeldiscription.set_vexpand(false);
     m_labeldiscription.set_hexpand(false);
-    
-    m_grid.attach(m_entryname,1,0,1,1);
-    m_grid.attach(m_labeldiscription,0,1,1,1);
-    m_grid.attach(m_scrollwin,1,1,1,1);
+   
+    m_grid.attach(m_entryname,1,1,1,1);
+    m_grid.attach(m_labeldiscription,0,2,1,1);
+    m_grid.attach(m_scrollwin,1,2,1,1);
     m_scrollwin.set_halign(Gtk::ALIGN_FILL);
     m_scrollwin.set_valign(Gtk::ALIGN_FILL);
     m_scrollwin.set_border_width(3);
@@ -59,9 +65,8 @@ ScpNewproject::ScpNewproject(Gtk::Window &parent):
     pbuttonbox->set_layout(Gtk::BUTTONBOX_SPREAD);
     pbuttonbox->set_spacing(3);
     
-    m_buttonok = add_button("Ok",Gtk::RESPONSE_OK);
-    m_buttoncancel = add_button("Cancel",Gtk::RESPONSE_CANCEL);
-
+    m_buttonok = add_button("_OK",Gtk::RESPONSE_OK);
+    m_buttoncancel = add_button("_Cancel",Gtk::RESPONSE_CANCEL);
     if(!m_buttonok || !m_buttoncancel)
         return ;
 
@@ -70,8 +75,6 @@ ScpNewproject::ScpNewproject(Gtk::Window &parent):
 
 ScpNewproject::~ScpNewproject()
 {
-
-
 }
 
 const Glib::ustring 
@@ -84,3 +87,20 @@ ScpNewproject::get_discription()const
 {
     return m_textviewdiscr.get_buffer()->get_text();
 }
+
+const Glib::ustring 
+ScpNewproject::get_id_as_string()const
+{
+    return m_entryid.get_text();
+}
+
+const long
+ScpNewproject::get_id()const
+{
+   return std::stol(m_entryid.get_text().c_str()); 
+}
+
+
+
+
+

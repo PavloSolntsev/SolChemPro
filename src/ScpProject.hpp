@@ -33,11 +33,11 @@ class ScpProject : public ScpReccord
         void set_name(const Glib::ustring &);
         const Glib::ustring &get_description()const;
         void set_description(const Glib::ustring &);
-        const long &get_id()const;
-        void set_id(const long &);
+        const gulong &get_id()const;
+        void set_id(const gulong &);
 
     protected:
-        long m_id; /*!< unique key for SQL purpose. This key has a format 111xxxxxx */
+        gulong m_id; /*!< unique key for SQL purpose. This key has a format 111xxxxxx */
         Glib::ustring m_name; /*!< Name of the project */
         Glib::ustring m_description; /*!< Description of the product */
 

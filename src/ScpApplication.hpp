@@ -22,8 +22,11 @@
 #include <gtkmm.h>
 #include "ScpAssistant.hpp"
 #include "ScpMainwindow.hpp"
+#include "ScpProject.hpp"
 #include <libgdamm.h>
 #include "ScpEnum.hpp"
+#include "ScpTable.hpp"
+#include <map>
 
 class ScpApplication final: public Gtk::Application
 {
@@ -40,6 +43,15 @@ class ScpApplication final: public Gtk::Application
 	    void on_action_disconnect();
 		  
 	private:
+        enum class Table {
+            USERS,
+            PROJECT
+        };
+        /*! TODO: enum class Table should be removed. There is a separate table class was created.
+         *  \todo enum class Table should be removed. There is a separate table class was created.
+         */
+        std::map<Table,Glib::ustring> m_tables;
+
 		Glib::KeyFile m_keyfile;		
 		Glib::ustring inifilepath;
 		Glib::RefPtr<Gnome::Gda::Connection> m_refConnection;	
@@ -52,9 +64,13 @@ class ScpApplication final: public Gtk::Application
 		void esteblish_connection_to_db(); 
         bool create_users_table();
         bool table_exists(const Glib::ustring);
+        bool table_exists(Table);
         void on_newproject_clicked();
+        void save_project(ScpProject &);
+        bool create_project_table();
 		ScpAssistant m_assistant;		
 		ScpMainwindow *m_refWindow;
+        ScpTable alltables;
 };
 		  
 #endif /* SCP_APPLICATION_HPP_ */

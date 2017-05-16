@@ -8,7 +8,7 @@ AC_CONFIG_HEADERS([config.h])
 AM_INIT_AUTOMAKE
 AC_CONFIG_MACRO_DIR([m4])
 if test -z $CXXFLAGS; then 
-    CXXFLAGS='-O0 -g2'
+    CXXFLAGS='-O0 -g2 '
 fi
 
 # Checks for programs.
@@ -16,7 +16,7 @@ AC_PROG_CXX
 AC_PROG_CC
 
 # Checks for libraries.
-PKG_CHECK_MODULES(SOLCHEMPRO, [gtkmm-3.0 glibmm-2.4 gdkmm-3.0 giomm-2.4 libgdamm-5.0])
+PKG_CHECK_MODULES(SOLCHEMPRO, [gtkmm-3.0 glibmm-2.54 gdkmm-3.0 giomm-2.54 libgdamm-6.0])
 PKG_CHECK_MODULES(SOLCHEMPRO_GIO, [glib-2.0])
 
 # Checks for header files.

@@ -94,10 +94,10 @@ ScpNewproject::get_id_as_string()const
     return m_entryid.get_text();
 }
 
-const long
+const gulong
 ScpNewproject::get_id()const
 {
-   return std::stol(m_entryid.get_text().c_str()); 
+   return std::stoul(m_entryid.get_text().c_str()); 
 }
 
 

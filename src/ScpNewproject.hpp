@@ -35,7 +35,7 @@ public:
     const Glib::ustring get_name()const;
     const Glib::ustring get_discription()const;
     const Glib::ustring get_id_as_string()const;
-    const long get_id()const;
+    const gulong get_id()const;
 
 protected:
     Gtk::Label m_labelid; /*!< Label for ID field */

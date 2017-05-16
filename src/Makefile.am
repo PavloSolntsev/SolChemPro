@@ -53,5 +53,7 @@ solchempro_SOURCES = \
 	ScpProject.cpp \
 	ScpNewproject.hpp \
 	ScpNewproject.cpp \
+	ScpTable.hpp \
+	ScpTable.cpp \
 	$(NULL)
 

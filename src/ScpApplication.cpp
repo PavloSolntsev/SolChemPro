@@ -25,6 +25,8 @@
 #include "ScpEnum.hpp"
 #include "ScpNewproject.hpp"
 
+using namespace Gnome;
+
 ScpApplication::ScpApplication()
 : Gtk::Application("org.gtkmm.solchempro")
 {
@@ -33,7 +35,9 @@ ScpApplication::ScpApplication()
 	m_assistant.set_default_size(600,400);
 	inifilepath = Glib::build_filename(Glib::get_user_config_dir(),PACKAGE_TARNAME);
 	inifilepath = Glib::build_filename(inifilepath,INIFILE);	
-
+    
+    m_tables.insert(std::make_pair<Table,Glib::ustring>(Table::USERS,"users"));
+    m_tables.insert(std::make_pair<Table,Glib::ustring>(Table::PROJECT,"project"));
 
 }
 
@@ -614,6 +618,39 @@ ScpApplication::table_exists(const Glib::ustring table)
     return dbo ? true : false;
 }
 
+/* \brief Check if table exists
+ *
+ * \param table - table name
+ * \return true if table exists, otherwise - false
+ *
+ * */
+bool 
+ScpApplication::table_exists(Table table)
+{
+    try{
+        if(!m_refConnection->update_meta_store("_tables"))
+        {
+            std::cerr << "Can't update meta store in " 
+                << __FILE__ << " at " << __LINE__ << std::endl;
+            return false;
+        }  
+    }catch(...)
+    {
+
+    }     
+     // End of TRY
+
+    Glib::RefPtr<Gnome::Gda::MetaStruct> refmetastruc = 
+        Gnome::Gda::MetaStruct::create(m_refConnection->get_meta_store(),
+                                       Gnome::Gda::META_STRUCT_FEATURE_NONE);
+
+    GdaMetaDbObject *dbo = refmetastruc->complement(Gnome::Gda::META_DB_TABLE,
+                                                    Gnome::Gda::Value(),
+                                                    Gnome::Gda::Value(),
+                                                    Gnome::Gda::Value(m_tables[table]));
+    return dbo ? true : false;
+}
+
 void
 ScpApplication::on_newproject_clicked()
 {
@@ -621,25 +658,85 @@ ScpApplication::on_newproject_clicked()
     ScpNewproject newproject(*m_refWindow);
     Glib::ustring project_name;
     Glib::ustring project_discr;
+    long project_id;
 
     int res = newproject.run();
 
     switch (res) {
         case Gtk::RESPONSE_OK:            
             {
-                project_name = newproject.get_name();
+                project_name  = newproject.get_name();
                 project_discr = newproject.get_discription();
+                project_id    = newproject.get_id();
             }            
             break;
         case Gtk::RESPONSE_CANCEL:
             {
+                return;
             }
             break;
 
         default:
             break;
     }    
+    
+    ScpProject project;
+    project.set_id(project_id);
+    project.set_name(project_name);
+    project.set_description(project_discr);
+
     std::cout << "Project name is " << project_name << std::endl;
     std::cout << "Project name is " << project_discr << std::endl;
+        
+    if(!table_exists(Table::PROJECT))
+        save_project(project);
+    else
+    {
+        if(!create_project_table())
+            std::cerr << "Can't create table. Something is wrong" << std::endl;
+        else
+            save_project(project);
+    }
+
 }
+
+void
+ScpApplication::save_project(ScpProject &project)
+{
+    Glib::RefPtr<Gda::SqlBuilder> pbuilder = Gda::SqlBuilder::create(Gda::SQL_STATEMENT_INSERT);
+    pbuilder->set_table(alltables.get_table(ScpTable::Tables::PROJECT));
+    pbuilder->add_field_value_as_value(alltables.get_name(ScpTable::Project::ID),
+                                       Gda::Value(project.get_id()));
+    pbuilder->add_field_value_as_value(alltables.get_name(ScpTable::Project::NAME),
+                                       Gda::Value(project.get_name()));
+    pbuilder->add_field_value_as_value(alltables.get_name(ScpTable::Project::DISCRIPTION),
+                                       Gda::Value(project.get_description()));
+    
+    m_refConnection->statement_execute_non_select_builder(pbuilder);
+}
+
+bool
+ScpApplication::create_project_table()
+{
+#ifdef DEBUG
+    std::cout << "Line " << __LINE__ << std::endl;
+#endif
+    const Glib::ustring sqlstr = "CREATE TABLE IF NOT EXISTS project"
+                                 "(project_id INT NOT NULL PRIMARY KEY,"
+                                 "name VARCHAR(255),";
+                                 "discription VARCHAR(255))";
+            
+    Glib::RefPtr<Gnome::Gda::SqlParser> parser;
+    parser = m_refConnection->create_parser();
+    if(!parser) 
+        parser = Gnome::Gda::SqlParser::create();
+      
+    Glib::RefPtr<Gnome::Gda::Statement> stmt;
+
+    stmt =  parser->parse_string (sqlstr);
+    m_refConnection->statement_execute_non_select (stmt);
+    
+    return true;
+}
+
 

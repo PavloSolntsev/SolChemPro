@@ -43,14 +43,14 @@ ScpProject::set_description(const Glib::ustring &descr)
     m_description = descr;
 }
 
-const long &
+const gulong &
 ScpProject::get_id()const
 {
     return m_id;
 }
 
 void 
-ScpProject::set_id(const long &id)
+ScpProject::set_id(const gulong &id)
 {
    m_id = id; 
 }

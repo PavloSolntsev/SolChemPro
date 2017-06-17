@@ -27,5 +27,8 @@
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
 
+/* Define a path for GUI resource files */
+#undef SCP_GUI_PREFIX
+
 /* Version number of package */
 #undef VERSION

@@ -24,21 +24,35 @@
 #include <config.h>
 #include "ScpEnum.hpp"
 #include "ScpNewproject.hpp"
+#include <gtkmm.h>
+#include "ScpGuipath.hpp"
+#define SCP_DEBUG(x) std::cout << "In " << __FILE__ << ": " << __LINE__<< " " << #x << std::endl;
+
 
 using namespace Gnome;
 
 ScpApplication::ScpApplication()
-: Gtk::Application("org.gtkmm.solchempro")
+: Gtk::Application("org.gtkmm.solchempro"),
+m_refsettings(nullptr),    
+m_refGuisettings(nullptr)
 {
     Gnome::Gda::init();
 	Glib::set_application_name("SolChemPro");
 	m_assistant.set_default_size(600,400);
-	inifilepath = Glib::build_filename(Glib::get_user_config_dir(),PACKAGE_TARNAME);
-	inifilepath = Glib::build_filename(inifilepath,INIFILE);	
+
+    m_refsettings = new ScpSettings();    
     
+    if(!m_refsettings)
+       std::cerr << "Can't allocate memory for ScpSettings object" << std::endl;
+     
     m_tables.insert(std::make_pair<Table,Glib::ustring>(Table::USERS,"users"));
     m_tables.insert(std::make_pair<Table,Glib::ustring>(Table::PROJECT,"project"));
 
+}
+
+ScpApplication::~ScpApplication()
+{
+    delete m_refsettings;
 }
 
 Glib::RefPtr<ScpApplication> ScpApplication::create()
@@ -107,55 +121,12 @@ void ScpApplication::on_startup()
 
 void ScpApplication::create_window()
 {
-#ifndef INIFILE 
-#define INIFILE "solchempro.ini"
-#endif
-	auto GFileini = Gio::File::create_for_path(inifilepath);
-	
-	auto parentdir = GFileini->get_parent();
-		
-	if(!GFileini->query_exists()){
-		try{	
-			if(!parentdir->query_exists())
-				parentdir->make_directory_with_parents();
-
-			GFileini->create_file(Gio::FILE_CREATE_REPLACE_DESTINATION);
-			m_keyfile.set_boolean( ScpKeyfile::GROUP_GENERAL,
-			                       ScpKeyfile::KEY_STARTCHECK,
-                                   true);
-			// TODO: check return value for save_to_file() functin
-			m_keyfile.save_to_file(inifilepath); 
-		}catch (Gio::Error &e){
-			std::cerr << "Can't create an INI file. " << std::endl;
-			std::cerr << "Check access to the " << Glib::get_user_config_dir() << std::endl;		
-			std::cerr << e.what() << std::endl;
-			on_action_quit();
-		}
-	}else
-	{
-//		m_keyfile.save_to_file(inifilepath); 
-		try{
-			m_keyfile.load_from_file(inifilepath);
-			m_keyfile.set_boolean(ScpKeyfile::GROUP_GENERAL,
-                                  ScpKeyfile::KEY_STARTCHECK,
-                                  true);	
-			// TODO: check return value for save_to_file() functin
-			m_keyfile.save_to_file(inifilepath); 
-		}catch(Glib::FileError &e){
-			std::cerr << "Error reading INI file" << std::endl;
-		}catch(Glib::KeyFileError &e){
-			std::cerr << "Error reading INI file" << std::endl;
-			std::cerr << __FILE__ << ": " << e.what() << std::endl;
-			on_action_quit();
-		}
-	}
-
     /*! TODO: Test pointer for nullptr value
      *  \todo Test pointer for nullptr value
      */
   m_refWindow = new ScpMainwindow();
   m_refWindow->set_default_size(800, 600);
-  m_refWindow->set_keyfilename(GFileini);
+//  m_refWindow->set_keyfilename(GFileini);
 
   //Make sure that the application runs for as long this window is still open:
   add_window(*m_refWindow);
@@ -179,35 +150,11 @@ void ScpApplication::on_window_hide(Gtk::Window* window)
 
 void ScpApplication::on_activate()
 {
-	try{
-		m_keyfile.load_from_file(inifilepath,Glib::KEY_FILE_KEEP_TRANSLATIONS);
-		
-		if(!m_keyfile.get_boolean(ScpKeyfile::GROUP_GENERAL,
-                                  ScpKeyfile::KEY_STARTCHECK))
-			first_time_start();
-
-	}catch(Glib::KeyFileError &e)
-	{
-		std::cerr << "Can't readINI file. " << std::endl;
-		std::cerr << "Check access to the " << inifilepath << std::endl;		
-		std::cerr << e.what() << std::endl;
-		first_time_start();
-
-	}catch(Glib::FileError &e)
-	{
-		std::cerr << "Can't readINI file. " << std::endl;
-		std::cerr << "Check access to the " << inifilepath << std::endl;		
-		std::cerr << e.what() << std::endl;
-		first_time_start();
-	}
-
-  //std::cout << "debug1: " << G_STRFUNC << std::endl;
-  // The application has been started, so let's show a window.
-  // A real application might want to reuse this "empty" window in on_open(),
-  // when asked to open a file, if no changes have been made yet.
-	
-	if(!m_assistant.is_visible())
-		create_window();
+    if(!m_refsettings->first_start())
+        first_time_start();
+    else
+        normal_start();
+    
 }
 
 void ScpApplication::on_action_quit()
@@ -236,63 +183,86 @@ bool
 ScpApplication::first_time_start()
 {
 	std::cout << "First time start" << std::endl;
-	
-//	auto assistant = new ScpAssistant();
-	
-	add_window(m_assistant);	
+    Glib::RefPtr<Gtk::Builder> refBuilder;
+    try {
+        /* For all possible strings for resources see ScpGuipath.hpp */
+        refBuilder = Gtk::Builder::create_from_resource(SCP_GUI_SETTINGS);
+    }catch(const Gtk::BuilderError& e ) {
+        std::cerr << "Resource file can't be loaded from " << std::endl; 
+        std::cerr << SCP_GUI_SETTINGS << std::endl;
+        std::cerr << e.what() << std::endl;
+        return false;
+    }catch(const Glib::Error& e){
+        std::cerr << "Resource file can't be loaded from " << std::endl; 
+        std::cerr << SCP_GUI_SETTINGS << std::endl;
+        std::cerr << e.what() << std::endl;
+        return false;
+    }
 
-	m_assistant.signal_apply().connect(sigc::mem_fun(*this,
-		&ScpApplication::write_preferences));
-	
-	m_assistant.signal_apply().connect(sigc::mem_fun(*this,
-		&ScpApplication::create_window));
-	
-	m_assistant.signal_cancel().connect(sigc::mem_fun(*this,
-		&ScpApplication::on_action_quit));
-	
-	m_assistant.show();
+    refBuilder->get_widget_derived("dialog_top",m_refGuisettings);
 
+    if(!m_refGuisettings)
+    {
+        std::cerr << "Can't get dialog_top from " << SCP_GUI_SETTINGS << std::endl;
+        return false;
+    }
+
+    m_refGuisettings->set_modal(true);
+    m_refGuisettings->signal_button_ok_clicked().connect(
+            sigc::mem_fun(*this,&ScpApplication::write_preferences)); 
+    m_refGuisettings->signal_hide().connect(
+            sigc::mem_fun(*this,&ScpApplication::on_settings_gui_hide));
+
+    add_window(*m_refGuisettings);
+
+    m_refGuisettings->show();
 	std::cout << "First time end" << std::endl;
+
 	return true;
 }
 
 void
-ScpApplication::write_preferences()
+ScpApplication::write_preferences(ScpGUISettings::ScpSettingsDialog dialog)
 {
-// dbtype	
-	
-	const Glib::ustring dbtype = m_assistant.get_dbtype();
+    if(!m_refsettings->file_exists()){
+        if(m_refsettings->create_ini_dir())
+           if(m_refsettings->create_ini_file())
+                m_refsettings->load_from_file();
+    } 
+    
+    m_refsettings->set_integer(ScpKeyfile::GROUP_CONNECTION,
+                               ScpKeyfile::KEY_DBTYPE,
+                               dialog.m_dbtype);
 
-	m_keyfile.set_string(ScpKeyfile::GROUP_CONNECTION,
-						 ScpKeyfile::KEY_DBTYPE,
-						 dbtype);
-
-	if(dbtype == ScpKeyfile::DBTYPE_SQLITE3)
+	if(dialog.m_dbtype == ScpGUISettings::SQLITE)
 	{
-		m_keyfile.set_string(ScpKeyfile::GROUP_CONNECTION,
+		m_refsettings->set_string(ScpKeyfile::GROUP_CONNECTION,
 							 ScpKeyfile::KEY_DBFILE,
-							 m_assistant.get_dbfile());
+							 dialog.m_dbfile);
 		
-        m_keyfile.set_string(ScpKeyfile::GROUP_CONNECTION,
+        m_refsettings->set_string(ScpKeyfile::GROUP_CONNECTION,
 							 ScpKeyfile::KEY_USERNAME,
-							 m_assistant.get_user());
+							 dialog.m_user); 
         
-        m_keyfile.set_integer(ScpKeyfile::GROUP_CONNECTION,
+/*        m_refsettings->set_integer(ScpKeyfile::GROUP_CONNECTION,
 							 ScpKeyfile::KEY_DBTYPE_ID,
-							 m_assistant.get_server_id());
+							 m_assistant.get_server_id()); */
 	}
 	else
 	{
-		m_keyfile.set_string(ScpKeyfile::GROUP_CONNECTION,
+		m_refsettings->set_string(ScpKeyfile::GROUP_CONNECTION,
 							 ScpKeyfile::KEY_SERVER,
-							 m_assistant.get_server());
+						     dialog.m_server);
 	
-		m_keyfile.set_string(ScpKeyfile::GROUP_CONNECTION,
+		m_refsettings->set_string(ScpKeyfile::GROUP_CONNECTION,
 							 ScpKeyfile::KEY_USERNAME,
-							 m_assistant.get_user());
+							 dialog.m_user);
 	}
-}
 
+    m_refsettings->save_to_file();
+    m_refsettings->save_first_start();
+
+}
 
 void 
 ScpApplication::on_action_connect()
@@ -398,7 +368,7 @@ ScpApplication::esteblish_connection_to_db()
 
 /* Read KeyFile */
     try{
-        m_keyfile.load_from_file(inifilepath);
+        m_refsettings->load_from_file();
 
     }catch(Glib::KeyFileError &e){
         std::cerr << "Error with reading Keyfile" << std::endl;
@@ -411,7 +381,7 @@ ScpApplication::esteblish_connection_to_db()
     }
     
     Scp::DatabaseType server_id = static_cast<Scp::DatabaseType>(
-                                        m_keyfile.get_integer(ScpKeyfile::GROUP_CONNECTION,
+                                        m_refsettings->get_integer(ScpKeyfile::GROUP_CONNECTION,
                                                               ScpKeyfile::KEY_DBTYPE_ID));
 
 
@@ -420,7 +390,7 @@ ScpApplication::esteblish_connection_to_db()
         case Scp::SQLITE3: /* SQLite3 */
         {
             /* Read settings from ini file */
-            Glib::ustring dbfile(m_keyfile.get_string(ScpKeyfile::GROUP_CONNECTION,
+            Glib::ustring dbfile(m_refsettings->get_string(ScpKeyfile::GROUP_CONNECTION,
                                                       ScpKeyfile::KEY_DBFILE));
             provider_name = "SQLite";
             cnc_string = Glib::ustring::compose("DB_DIR=%1;DB_NAME=%2",
@@ -434,12 +404,12 @@ ScpApplication::esteblish_connection_to_db()
             provider_name = "MySQL";
             
             cnc_string = Glib::ustring::compose("HOST=%1;DB_NAME=%1",
-                                       m_keyfile.get_string(ScpKeyfile::GROUP_CONNECTION,
+                                       m_refsettings->get_string(ScpKeyfile::GROUP_CONNECTION,
                                                             ScpKeyfile::KEY_SERVER),
-                                       m_keyfile.get_string(ScpKeyfile::GROUP_CONNECTION,
+                                       m_refsettings->get_string(ScpKeyfile::GROUP_CONNECTION,
                                                             ScpKeyfile::KEY_DBNAME));
             
-            Glib::ustring username = m_keyfile.get_string( ScpKeyfile::GROUP_CONNECTION,
+            Glib::ustring username = m_refsettings->get_string( ScpKeyfile::GROUP_CONNECTION,
                                                            ScpKeyfile::KEY_USERNAME);
 
             auto dialogtitle = Glib::ustring::compose("Enter password for %1",username);
@@ -540,7 +510,7 @@ ScpApplication::esteblish_connection_to_db()
         Glib::ustring buffer;
 
         do{
-            if(model_iter->get_value_at(0).get_string() == m_keyfile.get_string(
+            if(model_iter->get_value_at(0).get_string() == m_refsettings->get_string(
                                                                 ScpKeyfile::GROUP_CONNECTION,
                                                                 ScpKeyfile::KEY_USERNAME))
             {
@@ -737,6 +707,32 @@ ScpApplication::create_project_table()
     m_refConnection->statement_execute_non_select (stmt);
     
     return true;
+}
+
+/* bool 
+ScpApplication::check_ini_file()
+{
+    if(!m_refsettings->ini_file_available()){
+        std::cerr << "File: " << __FILE__ 
+                  << "Line: " << __LINE__ 
+                  << "INI file is not avaialble" << std::endl;
+        return false;
+    }
+
+    return true;
+}  */  
+ 
+bool
+ScpApplication::normal_start()
+{
+    delete m_refGuisettings;
+    create_window();
+}
+   
+void 
+ScpApplication::on_settings_gui_hide()
+{
+    normal_start();
 }
 
 

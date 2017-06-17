@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+    <gresource prefix="/org/gtkmm/solchempro/gui">
+      <file compressed="true" preprocess="xml-stripblanks">scp-mainwindow.glade</file>
+      <file compressed="true" preprocess="xml-stripblanks">scp-guisettings.glade</file>
+  </gresource>
+</gresources>
+	

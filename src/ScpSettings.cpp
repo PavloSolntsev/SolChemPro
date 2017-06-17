@@ -19,9 +19,9 @@
  * */ 
 #include "ScpSettings.hpp"
 #include <iostream>
+#include "ScpKeyfile.hpp"
 
 ScpSettings::ScpSettings():
-    m_keyfilename(DEFAULT_KEYFILE),
     m_objectstate(true)
 {
     init();
@@ -37,9 +37,9 @@ Glib::ustring& ScpSettings::get_filename()
 }
 
 const 
-Glib::ustring& ScpSettings::get_filepath()
+Glib::ustring ScpSettings::get_filepath()
 {
-    return m_keyfilepath;
+    return m_refgfile->get_path();
 }
 
 const 
@@ -49,52 +49,52 @@ Glib::KeyFile& ScpSettings::get_keyfile()
 }
 
 bool
-ScpSettings::get_boolean(const Group& group, const Key& key)
+ScpSettings::get_boolean(const Glib::ustring& group, const Glib::ustring& key)
 {
-    return get_boolean(group, key);
+    return m_keyfile.get_boolean(group, key);
 };
 
 int
-ScpSettings::get_integer(const Group& group, const Key& key)
+ScpSettings::get_integer(const Glib::ustring& group, const Glib::ustring& key)
 {
-    return get_integer(group, key);
+    return m_keyfile.get_integer(group, key);
 };
 
 double
-ScpSettings::get_double(const Group& group, const Key& key)
+ScpSettings::get_double(const Glib::ustring& group, const Glib::ustring& key)
 {
-    return get_double(group, key);
+    return m_keyfile.get_double(group, key);
 };
 
 const Glib::ustring 
-ScpSettings::get_string(const Group& group, const Key& key)
+ScpSettings::get_string(const Glib::ustring& group, const Glib::ustring& key)
 {
-    return get_string(group, key);
+    return m_keyfile.get_string(group, key);
 };
 
 
 void
-ScpSettings::set_boolean(const Group& group, const Key& key, bool val)
+ScpSettings::set_boolean(const Glib::ustring& group, const Glib::ustring& key, bool val)
 {
-    return set_boolean(group, key, val);
+    return m_keyfile.set_boolean(group, key, val);
 };
 
 void
-ScpSettings::set_integer(const Group& group, const Key& key, int val)
+ScpSettings::set_integer(const Glib::ustring& group, const Glib::ustring& key, int val)
 {
-    return set_integer(group, key, val);
+    return m_keyfile.set_integer(group, key, val);
 };
 
 void
-ScpSettings::set_double(const Group& group, const Key& key, double val)
+ScpSettings::set_double(const Glib::ustring& group, const Glib::ustring& key, double val)
 {
-    return set_double(group, key, val);
+    return m_keyfile.set_double(group, key, val);
 };
 
 void 
-ScpSettings::set_string(const Group& group, const Key& key, const Glib::ustring& val)
+ScpSettings::set_string(const Glib::ustring& group, const Glib::ustring& key, const Glib::ustring& val)
 {
-    return set_string(group, key, val);
+    return m_keyfile.set_string(group, key, val);
 };
 
 
@@ -106,47 +106,27 @@ ScpSettings::reset()
 
 }
 
-bool
-ScpSettings::init(const Glib::ustring& filename)
+void
+ScpSettings::init()
 {
-    m_keyfilepath = Glib::build_filename(Glib::get_user_config_dir(),PACKAGE_TARNAME);
-    m_keyfilepath = Glib::build_filename(m_keyfilepath,m_keyfilename);	
-	
-    auto GFileini = Gio::File::create_for_path(m_keyfilepath);
-	
-	auto parentdir = GFileini->get_parent();
-    
-    if(create_ini_dir(parentdir)){
-       if(create_ini_file(GFileini))
-       {
-            try {
-                m_keyfile.load_from_file(m_keyfilepath);
-                return true;
-            }catch(const Glib::FileError& fe) {
-			    std::cerr << "Error reading INI file" << std::endl;
-                std::cerr << fe.what() << std::endl;            
-                std::cerr << "Load file error code is " << fe.code() << std::endl;
-                m_objerror = Error::LOAD_FILE;
-                m_objectstate = false;
-                return false;
-            }catch(const Glib::KeyFileError& ke){
-                m_objerror = Error::LOAD_FILE;
-                m_objectstate = false;
-			    std::cerr << "Error reading INI file" << std::endl;
-			    std::cerr << __FILE__ << ": " << ke.what() << std::endl;
-                std::cerr << "Load file error code is " << ke.code() << std::endl;
-                return false;
-            }
-       }/* END IF*/ 
-    } /* END IF */
-    return false;
+    auto keyfilepath = Glib::build_filename(Glib::get_user_config_dir(), DEFAULT_INI_DIR);
+    keyfilepath = Glib::build_filename(keyfilepath,DEFAULT_KEYFILE);	
+    m_refgfile = Gio::File::create_for_path(keyfilepath);
+
+    std::cout << "INI file is: " << m_refgfile->get_path() << std::endl;
 }
+
 bool
 ScpSettings::create_ini_dir(const Glib::RefPtr<Gio::File>& dir)
 {
     try{
-        if(dir->make_directory_with_parents())
-            return true;
+        if(!dir)
+            dir->make_directory_with_parents();
+        else{
+            auto parentdir = m_refgfile->get_parent(); 
+            parentdir->make_directory_with_parents();
+        }
+
     }catch(const Gio::Error& e){
         auto errorcode = e.code();
         switch (errorcode)
@@ -190,10 +170,114 @@ ScpSettings::create_ini_dir(const Glib::RefPtr<Gio::File>& dir)
 }
 
 bool
+ScpSettings::create_ini_dir()
+{
+    try{
+        auto parentdir = m_refgfile->get_parent(); 
+        parentdir->make_directory_with_parents();
+
+    }catch(const Gio::Error& e){
+        auto errorcode = e.code();
+        switch (errorcode)
+        {
+            case Gio::Error::EXISTS:
+            {
+                std::cerr << "Directory exists " << std::endl;
+                m_objectstate = true;
+                return true;
+            }
+            break;    
+            case Gio::Error::NOT_SUPPORTED:
+            {
+                std::cerr << "File System doesn't support creating directories" << std::endl;
+                std::cerr << e.what() << std::endl;
+                m_objectstate = false;
+                m_objerror = Error::NOT_SUPPORTED;
+                return false;
+            }
+            break;
+            case Gio::Error::CANCELLED:
+            {
+                std::cerr << "Operation was cancelled" << std::endl;
+                std::cerr << e.what() << std::endl;
+                m_objectstate = false;
+                m_objerror = Error::CANCELLED;
+                return false;
+            }
+            break;
+            default:
+            {
+                std::cerr << "Unknown error code. Please report as bug" << std::endl;
+                m_objectstate = false;
+                m_objerror = Error::UNDEFINED;
+                return false;
+            }
+            break;
+        } /* End of switch */
+    } /* End of catch */
+    return false; 
+}
+
+
+bool
 ScpSettings::create_ini_file(const Glib::RefPtr<Gio::File>& file)
 {
     try{
-        file->create_file(Gio::FILE_CREATE_REPLACE_DESTINATION);
+        if(!file){
+            file->create_file(Gio::FILE_CREATE_REPLACE_DESTINATION);
+            return true;
+        }else{
+            m_refgfile->create_file(Gio::FILE_CREATE_REPLACE_DESTINATION);
+            return true;
+        }
+    }catch(const Gio::Error& e) {
+        auto errorcode = e.code();
+        switch (errorcode)
+        {
+            case Gio::Error::EXISTS:
+            {
+                std::cerr << "File already exists" << std::endl;
+                std::cerr << e.what() << std::endl;
+                m_objectstate = true;
+                return true;
+            }   
+            break;    
+            case Gio::Error::IS_DIRECTORY:
+            {
+                std::cerr << "You have directory with the same name as INI file" << std::endl;
+                std::cerr << e.what() << std::endl;
+                m_objectstate = false;
+                m_objerror = Error::IS_DIRECTORY;
+                return false;
+            }
+            break;
+            case Gio::Error::FILENAME_TOO_LONG:
+            {
+                std::cerr << "Filename too long" << std::endl;
+                std::cerr << e.what() << std::endl;
+                m_objectstate = false;
+                m_objerror = Error::FILENAME_TOO_LONG;
+                return false;
+            }
+            break;
+            default:
+            {
+                std::cerr << "Unknown error code. Please report as bug" << std::endl;
+                m_objectstate = false;
+                m_objerror = Error::UNDEFINED;
+                return false;
+            }
+            break;
+        } /* End of switch */
+    } /* End of caatch */
+    return false;
+}
+
+bool
+ScpSettings::create_ini_file()
+{
+    try{
+        m_refgfile->create_file(Gio::FILE_CREATE_REPLACE_DESTINATION);
         return true;
     }catch(const Gio::Error& e) {
         auto errorcode = e.code();
@@ -237,4 +321,80 @@ ScpSettings::create_ini_file(const Glib::RefPtr<Gio::File>& file)
     } /* End of caatch */
     return false;
 }
+
+bool
+ScpSettings::file_exists()
+{
+   return m_refgfile->query_exists(); 
+}
+
+bool 
+ScpSettings::save_first_start()
+{
+    if(!m_objectstate){
+        std::cerr << "Object is not ready. You need to call reset() to continue" << std::endl;
+        return false;
+    }else{ 
+        try{
+            auto kfpath(m_refgfile->get_path());
+		    m_keyfile.load_from_file(kfpath);
+		    m_keyfile.set_boolean(ScpKeyfile::GROUP_GENERAL,
+                                  ScpKeyfile::KEY_STARTCHECK,
+                                  true);	
+		    if(m_keyfile.save_to_file(kfpath))
+                return true;
+            else
+                return false;
+	    }catch(Glib::FileError &e){
+			        std::cerr << "Error reading INI file" << std::endl;
+                    return false;
+		}catch(Glib::KeyFileError &e){
+			    std::cerr << "Error reading INI file" << std::endl;
+			    std::cerr << __FILE__ << ": " << e.what() << std::endl;
+                return false;
+		}
+    }
+    return false; 
+    
+}
+
+bool 
+ScpSettings::first_start()
+{
+    bool res(false);
+
+    if(file_exists())
+        try {
+            m_keyfile.load_from_file(m_refgfile->get_path());
+            res = get_boolean(ScpKeyfile::GROUP_GENERAL,ScpKeyfile::KEY_STARTCHECK);
+        }catch(Glib::KeyFileError& e){
+            std::cerr << "1Can't get STARTCHECK" << std::endl;
+            std::cerr << e.what() << std::endl;
+        }catch(Glib::FileError& e){
+            std::cerr << "2Can't get STARTCHECK" << std::endl;
+            std::cerr << e.what() << std::endl;
+        }catch(Glib::Error& e){
+            std::cerr << "3Can't get STARTCHECK" << std::endl;
+            std::cerr << e.what() << std::endl;
+        }
+    else{
+        std::cerr << "File doesn't exists. Can't check for first run" << std::endl;
+    } 
+    
+    return res;
+}
+
+bool 
+ScpSettings::load_from_file(Glib::KeyFileFlags flags)
+{
+    return m_keyfile.load_from_file(m_refgfile->get_path(),flags);
+}
+
+bool 
+ScpSettings::save_to_file()
+{
+    return m_keyfile.save_to_file(m_refgfile->get_path());
+}
+
+
 

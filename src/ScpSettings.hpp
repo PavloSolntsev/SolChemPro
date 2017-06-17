@@ -22,13 +22,14 @@
 #include <libgdamm.h>
 #include <config.h>
 #include <giomm.h>
-#define DEFAULT_KEYFILE "solchempro.ini"
-
+#define DEFAULT_KEYFILE INIFILE 
+#define DEFAULT_INI_DIR PACKAGE_TARNAME
 
 /*! \class ScpSettings 
  *  \brief Class to read and write all settings for the program 
  * 
  *  The purpose of this class is to read and write settings information to the INI file.
+ *  
  */
 class ScpSettings {
     public:
@@ -37,29 +38,23 @@ class ScpSettings {
         virtual ~ScpSettings();
         const Glib::KeyFile& get_keyfile();
         const Glib::ustring& get_filename();
-        const Glib::ustring& get_filepath();
+        const Glib::ustring get_filepath();
 
-        struct Group {
-	        const Glib::ustring GENERAL     = "GENERAL";
-	        const Glib::ustring CONNECTION  = "CONNECTION";
-        };
-
-        struct Key {
-	        const Glib::ustring STARTCHECK  = "START_CHECK";
-	        const Glib::ustring DBTYPE      = "DBTYPE";
-	        const Glib::ustring DBNAME      = "DBNAME";
-	        const Glib::ustring SERVER      = "SERVER";
-	        const Glib::ustring USERNAME    = "USERNAME";
-	        const Glib::ustring DBFILE      = "DBFILE";
-	        const Glib::ustring DBTYPE_ID   = "DBTYPE_ID";
-        };
+/*	    const Glib::ustring GROUP_GENERAL     = "GENERAL";
+	    const Glib::ustring GROUP_CONNECTION  = "CONNECTION";
+                                 
+	    const Glib::ustring KEY_STARTCHECK  = "START_CHECK";
+	    const Glib::ustring KEY_DBTYPE      = "DBTYPE";
+	    const Glib::ustring KEY_DBNAME      = "DBNAME";
+	    const Glib::ustring KEY_SERVER      = "SERVER";
+	    const Glib::ustring KEY_USERNAME    = "USERNAME";
+	    const Glib::ustring KEY_DBFILE      = "DBFILE";
+	    const Glib::ustring KEY_DBTYPE_ID   = "DBTYPE_ID";
     
-        struct DBType {
-            const Glib::ustring SQLITE     = "SQLite3";         
-	        const Glib::ustring MYSQL      = "MySQL";
-	        const Glib::ustring POSTGRESQL = "PostgreSQL";
-        };
-       
+        const Glib::ustring SQLITE     = "SQLite3";         
+	    const Glib::ustring MYSQL      = "MySQL";
+	    const Glib::ustring POSTGRESQL = "PostgreSQL";
+  */     
         enum class Error {
             CLEAN = 0,
             NOT_SUPPORTED,
@@ -71,30 +66,46 @@ class ScpSettings {
             LOAD_FILE,
             INIT
         };
-
-        bool          get_boolean(const Group&, const Key&);
-        int           get_integer(const Group&, const Key&);
-        double        get_double(const Group&, const Key&);
-        const Glib::ustring get_string(const Group&, const Key&);
+     
+        /* 
+         * GET methods 
+         * */
+        bool                get_boolean(const Glib::ustring&, const Glib::ustring&);
+        int                 get_integer(const Glib::ustring&, const Glib::ustring&);
+        double              get_double(const Glib::ustring&, const Glib::ustring&);
+        const Glib::ustring get_string(const Glib::ustring&, const Glib::ustring&);
         
-        void set_boolean(const Group&, const Key&, bool);
-        void set_integer(const Group&, const Key&, int);
-        void set_double(const Group&, const Key&, double);
-        void set_string(const Group&, const Key&, const Glib::ustring& );
-
+        /* 
+         * SET methods 
+         * */
+        void set_boolean(const Glib::ustring&, const Glib::ustring&, bool);
+        void set_integer(const Glib::ustring&, const Glib::ustring&, int);
+        void set_double(const Glib::ustring&, const Glib::ustring&, double);
+        void set_string(const Glib::ustring&, const Glib::ustring&, const Glib::ustring& );
+        
         void reset();
-        bool init(const Glib::ustring& filename = DEFAULT_KEYFILE);
+
+        bool file_exists();
+        bool save_first_start(); /* This function create reccord about first start */
+        bool first_start(); /* Check if first recor is present in INI file */
+        bool create_ini_file(const Glib::RefPtr<Gio::File>& file); /*!< Create INI file */
+        bool create_ini_file(); /*!< Create INI file */
+        bool create_ini_dir(const Glib::RefPtr<Gio::File>& dir); /*!< Create directory for INI file */
+        bool create_ini_dir(); /*!< Create directory for INI file */
+        bool load_from_file(Glib::KeyFileFlags flags = Glib::KEY_FILE_NONE);
+        bool save_to_file();
         explicit operator bool()const{return m_objectstate;}
+
     protected:
 
         Glib::KeyFile m_keyfile; /*!< Key file to store all settings */
         Glib::ustring m_keyfilename; /*!< name of the INI file */
-        Glib::ustring m_keyfilepath; /*!< full path of the INI file */
+//        Glib::ustring m_keyfilepath; /*!< full path of the INI file */
+        Glib::RefPtr<Gio::File> m_refgfile; /*GFile object for INI file */
+
         bool m_objectstate; /*!< State of the object: true is good, false is bad */
         Error m_objerror; /*!< type of error, if any, for the object */
-        bool create_ini_file(const Glib::RefPtr<Gio::File>& file); /*!< Create INI file */
-        bool create_ini_dir(const Glib::RefPtr<Gio::File>& dir); /*!< Create directory and INI file */
-
+        void init();
 };
 
 #endif

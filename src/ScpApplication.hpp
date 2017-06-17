@@ -26,6 +26,8 @@
 #include <libgdamm.h>
 #include "ScpEnum.hpp"
 #include "ScpTable.hpp"
+#include "ScpSettings.hpp"
+#include "ScpGUISettings.hpp"
 #include <map>
 
 class ScpApplication final: public Gtk::Application
@@ -35,6 +37,7 @@ class ScpApplication final: public Gtk::Application
 		
 	public:
 		static Glib::RefPtr<ScpApplication> create();
+        virtual ~ScpApplication();
 
 	//Overrides of default signal handlers:
 		void on_activate() override;
@@ -60,7 +63,9 @@ class ScpApplication final: public Gtk::Application
 	    void on_action_quit();
 	    void on_action_print(const Glib::VariantBase& parameter);
 		bool first_time_start();
-		void write_preferences();
+        void on_settings_gui_hide();
+        bool normal_start();
+		void write_preferences(ScpGUISettings::ScpSettingsDialog dialog);
 		void esteblish_connection_to_db(); 
         bool create_users_table();
         bool table_exists(const Glib::ustring);
@@ -68,9 +73,12 @@ class ScpApplication final: public Gtk::Application
         void on_newproject_clicked();
         void save_project(ScpProject &);
         bool create_project_table();
+ //       bool check_ini_file();
 		ScpAssistant m_assistant;		
 		ScpMainwindow *m_refWindow;
         ScpTable alltables;
+        ScpSettings *m_refsettings;
+        ScpGUISettings *m_refGuisettings;
 };
 		  
 #endif /* SCP_APPLICATION_HPP_ */

@@ -1,0 +1,67 @@
+@startuml
+
+start
+note 
+    From Application
+end note
+:Check for INI file;
+:Create ScpSettings instance;
+:Call ScpSettings->ini_file_exists;
+:If not exist, move forward;
+
+if (INI file available?) then (**yes**)
+    :Read information for first start;
+    :If no first start then execute first start function;
+    :Read DB connection data from INI file;
+else (**no**)
+    :Create INI file;
+    :Mark key as "first start = no";
+    :Initiate Settings dialog;
+    note 
+        Settings dialog will start automatically 
+        if start is "first start".
+        May be modified latter, if needed.
+    end note
+
+    if(dbtype == SQLite3) then (**yes**)
+        :We need only file name location;
+    else (**no**)
+        :Server name should be provided;
+        :DB name should be provided;
+        :User name should be provided;
+        :Password should be provided;
+        :Connection options should be provided;
+    endif
+    :Save data to INI file;
+endif
+
+:Connect to DB;
+
+if(Connection is open?) then (**yes**)
+    :Report about opened connection;
+endif
+
+if (Connection successful?) then (**yes**)
+    :Read information about users from DB;
+    if(dbtype != SQLite3) then (**yes**)
+        :Read information about users from DB;
+        :Check user rights;
+        if(access granded?) then (**yes**)
+            :Leave the connection;
+        else (**no**)
+            :Close the connection;
+            :Report the issue;
+        endif 
+    else (**no**)
+        :Leave the connection;
+    endif
+else (**no**)
+    :report connection issue;
+endif
+
+
+
+end
+
+@enduml
+

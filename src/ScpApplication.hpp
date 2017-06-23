@@ -75,10 +75,10 @@ class ScpApplication final: public Gtk::Application
         bool create_project_table();
  //       bool check_ini_file();
 		ScpAssistant m_assistant;		
-		ScpMainwindow *m_refWindow;
+		ScpMainwindow* m_refWindow;
         ScpTable alltables;
-        ScpSettings *m_refsettings;
-        ScpGUISettings *m_refGuisettings;
+        ScpSettings* m_refsettings;
+        ScpGUISettings* m_refGuisettings;
 };
 		  
 #endif /* SCP_APPLICATION_HPP_ */

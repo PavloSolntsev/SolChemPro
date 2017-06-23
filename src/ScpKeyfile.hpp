@@ -34,12 +34,13 @@ namespace ScpKeyfile
 	const Glib::ustring GROUP_CONNECTION  = "CONNECTION";
 
 	const Glib::ustring KEY_STARTCHECK    = "START_CHECK";
-	const Glib::ustring KEY_DBTYPE        = "DBTYPE";
+	const Glib::ustring KEY_DBTYPE_STR     = "DBTYPE_STR";
 	const Glib::ustring KEY_DBNAME        = "DBNAME";
 	const Glib::ustring KEY_SERVER        = "SERVER";
 	const Glib::ustring KEY_USERNAME      = "USERNAME";
 	const Glib::ustring KEY_DBFILE        = "DBFILE";
 	const Glib::ustring KEY_DBTYPE_ID     = "DBTYPE_ID";
+	const Glib::ustring KEY_OPTIONS       = "OPTIONS";
 
 	const Glib::ustring DBTYPE_SQLITE3    = "SQLite3";
 	const Glib::ustring DBTYPE_MYSQL      = "MySQL";

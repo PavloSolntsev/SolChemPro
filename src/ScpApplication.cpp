@@ -210,7 +210,7 @@ ScpApplication::first_time_start()
     m_refGuisettings->set_modal(true);
     m_refGuisettings->signal_button_ok_clicked().connect(
             sigc::mem_fun(*this,&ScpApplication::write_preferences)); 
-    m_refGuisettings->signal_hide().connect(
+    m_refGuisettings->signal_button_cancel_clicked().connect(
             sigc::mem_fun(*this,&ScpApplication::on_settings_gui_hide));
 
     add_window(*m_refGuisettings);
@@ -231,37 +231,45 @@ ScpApplication::write_preferences(ScpGUISettings::ScpSettingsDialog dialog)
     } 
     
     m_refsettings->set_integer(ScpKeyfile::GROUP_CONNECTION,
-                               ScpKeyfile::KEY_DBTYPE,
+                               ScpKeyfile::KEY_DBTYPE_ID,
                                dialog.m_dbtype);
+    
+    m_refsettings->set_string(ScpKeyfile::GROUP_CONNECTION,
+							 ScpKeyfile::KEY_DBTYPE_STR,
+							 dialog.m_dbtype_str); 
 
 	if(dialog.m_dbtype == ScpGUISettings::SQLITE)
 	{
 		m_refsettings->set_string(ScpKeyfile::GROUP_CONNECTION,
 							 ScpKeyfile::KEY_DBFILE,
 							 dialog.m_dbfile);
-		
-        m_refsettings->set_string(ScpKeyfile::GROUP_CONNECTION,
-							 ScpKeyfile::KEY_USERNAME,
-							 dialog.m_user); 
-        
-/*        m_refsettings->set_integer(ScpKeyfile::GROUP_CONNECTION,
-							 ScpKeyfile::KEY_DBTYPE_ID,
-							 m_assistant.get_server_id()); */
 	}
 	else
 	{
 		m_refsettings->set_string(ScpKeyfile::GROUP_CONNECTION,
 							 ScpKeyfile::KEY_SERVER,
 						     dialog.m_server);
+		
+        m_refsettings->set_string(ScpKeyfile::GROUP_CONNECTION,
+							 ScpKeyfile::KEY_DBNAME,
+						     dialog.m_dbname);
 	
 		m_refsettings->set_string(ScpKeyfile::GROUP_CONNECTION,
 							 ScpKeyfile::KEY_USERNAME,
 							 dialog.m_user);
+		
+        m_refsettings->set_string(ScpKeyfile::GROUP_CONNECTION,
+							 ScpKeyfile::KEY_OPTIONS,
+							 dialog.m_options);
 	}
 
     m_refsettings->save_to_file();
     m_refsettings->save_first_start();
-
+    
+    if(!m_refWindow)
+    {
+        create_window();
+    }
 }
 
 void 
@@ -732,7 +740,7 @@ ScpApplication::normal_start()
 void 
 ScpApplication::on_settings_gui_hide()
 {
-    normal_start();
+    delete m_refGuisettings;
 }
 
 

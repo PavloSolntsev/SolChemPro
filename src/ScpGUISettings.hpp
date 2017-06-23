@@ -41,25 +41,31 @@ class ScpGUISettings final : public Gtk::Window {
 
         struct ScpSettingsDialog {
             DBType m_dbtype;
+            Glib::ustring m_dbtype_str;
             Glib::ustring m_dbname;
             Glib::ustring m_dbfile;
             Glib::ustring m_user;
             Glib::ustring m_server;
+            Glib::ustring m_options;
         };
 
         DBType get_dbtype();
 
 /* SIGNALS */
         typedef sigc::signal<void,ScpSettingsDialog> type_signal_button_ok_clicked;
+        typedef sigc::signal<void> type_signal_button_cancel_clicked;
         type_signal_button_ok_clicked signal_button_ok_clicked();
+        type_signal_button_cancel_clicked signal_button_cancel_clicked();
 /* End of signals */
 
         void on_button_ok_clicked();
         void on_button_cancel_clicked();
 
         void on_combo_dbtype_changed();
+        void on_button_select_sqlite_dir_clicked();
     private:
-        type_signal_button_ok_clicked m_signal_new_project_button;
+        type_signal_button_ok_clicked m_signal_button_ok_clicked;
+        type_signal_button_cancel_clicked m_signal_button_cancel_clicked;
         
         class ModelColumn : public Gtk::TreeModel::ColumnRecord {
             public:
@@ -79,7 +85,12 @@ class ScpGUISettings final : public Gtk::Window {
         Glib::RefPtr<Gtk::ListStore> m_refTreemodeldb;
         Gtk::Button* m_refButton_ok;
         Gtk::Button* m_refButton_cancel;
-        Gtk::FileChooserButton* m_refFilechoosesqlite;
+        Gtk::Button* m_refButtonSelectDBDir;
+        Gtk::Entry* m_refEntrySqliteDbFile;
+        Gtk::Entry* m_refEntryMysqlServer;
+        Gtk::Entry* m_refEntryMysqlDB;
+        Gtk::Entry* m_refEntryMysqlUser;
+        Gtk::Entry* m_refEntryMysqlOptions;
 
 
 };
